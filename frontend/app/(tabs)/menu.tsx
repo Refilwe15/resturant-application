@@ -9,39 +9,108 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useState } from "react";
+import { router } from "expo-router";
+
+/* -------------------- CATEGORIES -------------------- */
 
 const categories = ["Burgers", "Sides", "Desserts", "Drinks"];
 
+/* -------------------- DATA -------------------- */
+
 const burgers = [
   {
-    id: "1",
+    id: "b1",
     name: "Classic Burger",
     desc: "Juicy beef patty topped with cheese and mayo sauce.",
     price: "R189.99",
     image: require("../../assets/images/rb2.png"),
   },
   {
-    id: "2",
+    id: "b2",
     name: "Spicy Chicken Burger",
     desc: "Juicy chicken patty topped with cheese and mayo sauce.",
     price: "R110.99",
     image: require("../../assets/images/rb1.png"),
   },
   {
-    id: "3",
+    id: "b3",
     name: "Gourmet Black Bun Burger",
     desc: "Juicy beef patty topped with cheese and mayo sauce.",
     price: "R120.99",
     image: require("../../assets/images/rb3.png"),
   },
   {
-    id: "4",
+    id: "b4",
     name: "Beef Burger",
     desc: "Juicy beef patty topped with cheese and mayo sauce.",
     price: "R210.99",
     image: require("../../assets/images/rb4.png"),
   },
 ];
+
+const sides = [
+  {
+    id: "s1",
+    name: "French Fries",
+    desc: "Crispy golden fries with salt.",
+    price: "R39.99",
+    image: require("../../assets/images/fries.png"),
+  },
+  {
+    id: "s2",
+    name: "Chicken Wings",
+    desc: "Spicy grilled chicken wings.",
+    price: "R69.99",
+    image: require("../../assets/images/wings.png"),
+  },
+  {
+    id: "s3",
+    name: "Nuggets",
+    desc: "Crispy chicken nuggets served hot.",
+    price: "R29.99",
+    image: require("../../assets/images/nuggets.png"),
+  },
+];
+
+const desserts = [
+  {
+    id: "d1",
+    name: "Oreo Sundae",
+    desc: "Vanilla ice cream topped with Oreo crumbs.",
+    price: "R29.99",
+    image: require("../../assets/images/oreo.png"),
+  },
+  {
+    id: "d2",
+    name: "Chocolate Brownie",
+    desc: "Warm chocolate brownie with fudge sauce.",
+    price: "R34.99",
+    image: require("../../assets/images/ch1.png"),
+  },
+  {
+    id: "d3",
+    name: "Milkshake",
+    desc: "Creamy vanilla milkshake.",
+    price: "R24.99",
+    image: require("../../assets/images/ch2.png"),
+  },
+  {
+    id: "d4",
+    name: "Ice Cream Cone",
+    desc: "Classic vanilla ice cream cone.",
+    price: "R19.99",
+    image: require("../../assets/images/ch3.png"),
+  },
+];
+
+const menuData: any = {
+  Burgers: burgers,
+  Sides: sides,
+  Desserts: desserts,
+  Drinks: [],
+};
+
+/* -------------------- SCREEN -------------------- */
 
 export default function MenuScreen() {
   const [activeCategory, setActiveCategory] = useState("Burgers");
@@ -99,24 +168,34 @@ export default function MenuScreen() {
         ))}
       </View>
 
-      {/* Burgers Grid */}
-      <FlatList
-        data={burgers}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        numColumns={2}
-        columnWrapperStyle={{ justifyContent: "space-between" }}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      />
+      {/* Menu Grid */}
+      {menuData[activeCategory].length === 0 ? (
+        <Text style={styles.emptyText}>Coming soon</Text>
+      ) : (
+        <FlatList
+          data={menuData[activeCategory]}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          numColumns={2}
+          columnWrapperStyle={{ justifyContent: "space-between" }}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 120 }}
+        />
+      )}
 
-      {/* View Cart */}
-      <TouchableOpacity style={styles.cartBtn}>
+      {/* View Cart Button */}
+      <TouchableOpacity
+        style={styles.cartBtn}
+        onPress={() => router.push("/(tabs)/cart")}
+      >
         <Text style={styles.cartText}>View Cart</Text>
       </TouchableOpacity>
     </View>
   );
 }
+
+/* -------------------- STYLES -------------------- */
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -221,6 +300,13 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
+  },
+
+  emptyText: {
+    textAlign: "center",
+    marginTop: 40,
+    color: "#999",
+    fontSize: 14,
   },
 
   cartBtn: {
