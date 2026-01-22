@@ -1,0 +1,191 @@
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
+import { router } from "expo-router";
+import { MaterialIcons, Feather } from "@expo/vector-icons";
+
+export default function RegisterScreen() {
+  return (
+    <View style={styles.container}>
+      {/* Logo */}
+      <Image
+        source={require("../../assets/images/login.png")}
+        style={styles.logo}
+      />
+
+      {/* Title */}
+      <Text style={styles.title}>Create Account</Text>
+
+      {/* Subtitle */}
+      <Text style={styles.subtitle}>
+        Sign up to enjoy delicious meals{"\n"}
+        delivered to your doorstep.
+      </Text>
+
+      {/* Name */}
+      <View style={styles.inputWrapper}>
+        <Feather name="user" size={20} color="#B8B8B8" />
+        <TextInput
+          placeholder="Full Name"
+          placeholderTextColor="#B8B8B8"
+          style={styles.input}
+        />
+      </View>
+
+      {/* Email */}
+      <View style={styles.inputWrapper}>
+        <MaterialIcons name="email" size={20} color="#B8B8B8" />
+        <TextInput
+          placeholder="Email"
+          placeholderTextColor="#B8B8B8"
+          style={styles.input}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+      </View>
+
+      {/* Password */}
+      <View style={styles.inputWrapper}>
+        <Feather name="lock" size={20} color="#B8B8B8" />
+        <TextInput
+          placeholder="Password"
+          placeholderTextColor="#B8B8B8"
+          secureTextEntry
+          style={styles.input}
+        />
+      </View>
+
+      {/* Confirm Password */}
+      <View style={styles.inputWrapper}>
+        <Feather name="lock" size={20} color="#B8B8B8" />
+        <TextInput
+          placeholder="Confirm Password"
+          placeholderTextColor="#B8B8B8"
+          secureTextEntry
+          style={styles.input}
+        />
+      </View>
+
+      {/* Register button */}
+      <TouchableOpacity
+        style={styles.registerBtn}
+        onPress={() => router.replace("/(tabs)")}
+      >
+        <Text style={styles.registerText}>Register</Text>
+      </TouchableOpacity>
+
+      {/* Login */}
+      <View style={styles.loginWrapper}>
+        <Text style={styles.loginText}>Already have an account?</Text>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={styles.loginLink}> Login</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Indicator */}
+      <View style={styles.indicator} />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    paddingTop : 80,
+  },
+
+  logo: {
+    width: 150,
+    height: 150,
+    marginBottom: -20,
+  },
+
+  title: {
+    fontSize: 30,
+    fontWeight: "800",
+    fontFamily: "PoppinsSemiBold",
+    color: "#000",
+    marginBottom: 0,
+  },
+
+  subtitle: {
+    fontSize: 14,
+    fontFamily: "PoppinsRegular",
+    color: "#7A7A7A",
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 30,
+  },
+
+  inputWrapper: {
+    width: "85%",
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#EFEFEF",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 16,
+  },
+
+  input: {
+    flex: 1,
+    marginLeft: 10,
+    fontSize: 14,
+    fontFamily: "PoppinsRegular",
+    color: "#000",
+  },
+
+  registerBtn: {
+    width: "60%",
+    height: 48,
+    backgroundColor: "#F4B400",
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+    marginBottom: 24,
+  },
+
+  registerText: {
+    fontSize: 16,
+    fontFamily: "PoppinsSemiBold",
+    color: "#FFF",
+  },
+
+  loginWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  loginText: {
+    fontSize: 12,
+    fontFamily: "PoppinsRegular",
+    color: "#7A7A7A",
+  },
+
+  loginLink: {
+    fontSize: 12,
+    fontFamily: "PoppinsSemiBold",
+    color: "#F4B400",
+  },
+
+  indicator: {
+    position: "absolute",
+    bottom: 90,
+    left: 40,
+    width: 60,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: "#F4B400",
+  },
+});

@@ -1,7 +1,7 @@
 import express, { Request, Response, Router } from "express";
-import { CartItem } from "../models/CartItem";
-import { FoodItem } from "../models/FoodItem";
-import { authMiddleware } from "../middlewares/auth";
+import { CartItem } from "../models/CartItem.ts";
+import { FoodItem } from "../models/FoodItem.ts";
+import { authMiddleware } from "../middlewares/auth.ts";
 
 const router: Router = express.Router();
 

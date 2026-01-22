@@ -1,6 +1,6 @@
 import { DataTypes, Model } from "sequelize";
-import { sequelize } from "../config/db";
-import { User } from "./User";
+import { sequelize } from "../config/db.ts";
+import { User } from "./User.ts";
 
 export class Order extends Model {
   public id!: string;
@@ -42,7 +42,7 @@ Order.init(
     sequelize,
     tableName: "orders",
     modelName: "Order",
-  }
+  },
 );
 
 User.hasMany(Order, { foreignKey: "userId" });

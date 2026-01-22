@@ -7,7 +7,7 @@ export default function ReviewsScreen() {
       {/* Skip */}
       <TouchableOpacity
         style={styles.skip}
-        onPress={() => router.replace("/onboarding/login")}
+        onPress={() => router.replace("/(onboarding)/login")}
       >
         <Text style={styles.skipText}>Skip</Text>
       </TouchableOpacity>
@@ -29,7 +29,7 @@ export default function ReviewsScreen() {
       {/* Arrow button */}
       <TouchableOpacity
         style={styles.arrowWrapper}
-        onPress={() => router.push("/onboarding/login")}
+        onPress={() => router.push("/(onboarding)/login")}
         activeOpacity={0.8}
       >
         <Image
