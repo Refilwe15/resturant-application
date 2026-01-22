@@ -1,5 +1,5 @@
 import { DataTypes, Model } from "sequelize";
-import { sequelize } from "../config/db";
+import { sequelize } from "../config/db.ts";
 import bcrypt from "bcryptjs";
 
 export class User extends Model {
@@ -12,7 +12,6 @@ export class User extends Model {
   public address?: string;
   public cardDetails?: string;
   public isAdmin!: boolean;
-
 
   public async validatePassword(password: string): Promise<boolean> {
     return bcrypt.compare(password, this.password);
@@ -67,5 +66,5 @@ User.init(
         user.password = await bcrypt.hash(user.password, salt);
       },
     },
-  }
+  },
 );

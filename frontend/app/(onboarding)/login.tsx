@@ -7,18 +7,21 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { router } from "expo-router";
-import { Mail01Icon, LockPasswordIcon } from "hugeicons-react";
+import { MaterialIcons, Feather } from "@expo/vector-icons";
 
 export default function LoginScreen() {
   return (
     <View style={styles.container}>
+      {/* Logo */}
       <Image
         source={require("../../assets/images/login.png")}
         style={styles.logo}
       />
 
+      {/* Title */}
       <Text style={styles.title}>Hello</Text>
 
+      {/* Subtitle */}
       <Text style={styles.subtitle}>
         Sign in your account because good food{"\n"}
         deserves easy access.
@@ -26,18 +29,19 @@ export default function LoginScreen() {
 
       {/* Email */}
       <View style={styles.inputWrapper}>
-        <Mail01Icon size={20} color="#B8B8B8" />
+        <MaterialIcons name="email" size={20} color="#B8B8B8" />
         <TextInput
           placeholder="Email"
           placeholderTextColor="#B8B8B8"
           style={styles.input}
           keyboardType="email-address"
+          autoCapitalize="none"
         />
       </View>
 
       {/* Password */}
       <View style={styles.inputWrapper}>
-        <LockPasswordIcon size={20} color="#B8B8B8" />
+        <Feather name="lock" size={20} color="#B8B8B8" />
         <TextInput
           placeholder="Password"
           placeholderTextColor="#B8B8B8"
@@ -46,24 +50,28 @@ export default function LoginScreen() {
         />
       </View>
 
+      {/* Forgot password */}
       <TouchableOpacity style={styles.forgot}>
-        <Text style={styles.forgotText}>forgot your Password ?</Text>
+        <Text style={styles.forgotText}>Forgot your password?</Text>
       </TouchableOpacity>
 
+      {/* Login button */}
       <TouchableOpacity
         style={styles.loginBtn}
-        onPress={() => router.replace("/onboarding/reviews")}
+        onPress={() => router.replace("../(tabs)")}
       >
         <Text style={styles.loginText}>Login</Text>
       </TouchableOpacity>
 
+      {/* Register */}
       <View style={styles.registerWrapper}>
-        <Text style={styles.registerText}> Dont have an account ? </Text>
-        <TouchableOpacity onPress={() => router.push("/onboarding/register")}>
-          <Text style={styles.registerLink}>Register Now</Text>
+        <Text style={styles.registerText}>Don’t have an account?</Text>
+        <TouchableOpacity onPress={() => router.push("/(onboarding)/register")}>
+          <Text style={styles.registerLink}> Register Now</Text>
         </TouchableOpacity>
       </View>
 
+      {/* Indicator */}
       <View style={styles.indicator} />
     </View>
   );
@@ -74,25 +82,26 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
-    paddingTop: 70,
+    paddingTop: 80,
   },
 
   logo: {
     width: 180,
     height: 180,
-    resizeMode: "contain",
-    marginBottom: 20,
+   
+    marginBottom: 10,
   },
 
   title: {
-    fontSize: 24,
+    fontSize: 30,
+    fontWeight : 800,
     fontFamily: "PoppinsSemiBold",
     color: "#000",
-    marginBottom: 8,
+    marginBottom: 0,
   },
 
   subtitle: {
-    fontSize: 14,
+    fontSize: 18,
     fontFamily: "PoppinsRegular",
     color: "#7A7A7A",
     textAlign: "center",

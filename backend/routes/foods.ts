@@ -1,6 +1,6 @@
 import express, { Request, Response, Router } from "express";
-import { FoodItem } from "../models/FoodItem";
-import { authMiddleware } from "../middlewares/auth";
+import { FoodItem } from "../models/FoodItem.ts";
+import { authMiddleware } from "../middlewares/auth.ts";
 
 const router: Router = express.Router();
 
