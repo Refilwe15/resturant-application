@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
-import { User } from "../models/User";
-import { authMiddleware } from "../middlewares/auth";
+import { User } from "../models/User.ts";
+import { authMiddleware } from "../middlewares/auth.ts";
 
 interface AuthRequest extends Request {
   user: User; // full Sequelize User instance
@@ -9,7 +9,7 @@ interface AuthRequest extends Request {
 const router = Router();
 
 router.get("/profile", authMiddleware, async (req: Request, res: Response) => {
-  const authReq = req as AuthRequest; 
+  const authReq = req as AuthRequest; // ✅ cast inside
   if (!authReq.user) return res.status(401).json({ message: "Unauthorized" });
 
   res.json(authReq.user);

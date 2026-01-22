@@ -1,8 +1,8 @@
 import express, { Request, Response, Router } from "express";
-import { Order } from "../models/Order";
-import { CartItem } from "../models/CartItem";
-import { FoodItem } from "../models/FoodItem";
-import { authMiddleware } from "../middlewares/auth";
+import { Order } from "../models/Order.ts";
+import { CartItem } from "../models/CartItem.ts";
+import { FoodItem } from "../models/FoodItem.ts";
+import { authMiddleware } from "../middlewares/auth.ts";
 
 const router: Router = express.Router();
 

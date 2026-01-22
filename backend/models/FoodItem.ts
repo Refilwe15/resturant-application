@@ -1,5 +1,5 @@
 import { DataTypes, Model, Optional } from "sequelize";
-import { sequelize } from "../config/db";
+import { sequelize } from "../config/db.ts";
 
 interface FoodItemAttributes {
   id: string;
@@ -11,10 +11,10 @@ interface FoodItemAttributes {
   extras?: object[];
 }
 
-
-interface FoodItemCreationAttributes
-  extends Optional<FoodItemAttributes, "id" | "description" | "image" | "extras"> {}
-
+interface FoodItemCreationAttributes extends Optional<
+  FoodItemAttributes,
+  "id" | "description" | "image" | "extras"
+> {}
 
 export class FoodItem
   extends Model<FoodItemAttributes, FoodItemCreationAttributes>
@@ -28,7 +28,6 @@ export class FoodItem
   public type!: string;
   public extras?: object[];
 }
-
 
 FoodItem.init(
   {
@@ -64,5 +63,5 @@ FoodItem.init(
     sequelize,
     tableName: "food_items",
     modelName: "FoodItem",
-  }
+  },
 );

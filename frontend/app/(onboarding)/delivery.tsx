@@ -13,7 +13,7 @@ export default function DeliveryScreen() {
       {/* Skip */}
       <TouchableOpacity
         style={styles.skip}
-        onPress={() => router.replace("/onboarding/reviews")}
+        onPress={() => router.replace("/(onboarding)/reviews")}
       >
         <Text style={styles.skipText}>Skip</Text>
       </TouchableOpacity>
@@ -37,7 +37,7 @@ export default function DeliveryScreen() {
       {/* Arrow button */}
       <TouchableOpacity
         style={styles.arrowWrapper}
-        onPress={() => router.push("/onboarding/reviews")}
+        onPress={() => router.push("/(onboarding)/reviews")}
         activeOpacity={0.7}
       >
         <Image
