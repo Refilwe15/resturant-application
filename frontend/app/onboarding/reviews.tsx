@@ -29,7 +29,7 @@ export default function ReviewsScreen() {
       {/* Arrow button */}
       <TouchableOpacity
         style={styles.arrowWrapper}
-        onPress={() => router.push("/onboarding/delivery")}
+        onPress={() => router.push("/onboarding/login")}
         activeOpacity={0.8}
       >
         <Image
@@ -67,20 +67,19 @@ const styles = StyleSheet.create({
     height: 280,
     resizeMode: "contain",
     marginTop: 40,
-
   },
 
   title: {
     fontSize: 22,
     fontFamily: "PoppinsSemiBold",
-    fontWeight : "800",
+    fontWeight: "800",
     color: "#000",
     textAlign: "center",
     marginBottom: 4,
   },
 
   subtitle: {
-    fontSize:18,
+    fontSize: 18,
     fontFamily: "PoppinsRegular",
     color: "#7A7A7A",
     textAlign: "center",
@@ -96,7 +95,6 @@ const styles = StyleSheet.create({
   arrow: {
     width: 120,
     height: 120,
-   
   },
 
   indicator: {
