@@ -35,7 +35,7 @@ export default function OnboardingOne() {
       duration: 8000,
       useNativeDriver: false,
     }).start(() => {
-      router.replace("/onboarding/delivery");
+      router.replace("/(onboarding)/delivery");
     });
   }, []);
 

@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { User } from "../models/User";
-
 
 export const authMiddleware = async (
   req: Request,
@@ -18,8 +17,7 @@ export const authMiddleware = async (
     const user = await User.findByPk(decoded.id);
     if (!user) return res.status(401).json({ message: "User not found" });
 
-
-    (req as any).user = user; 
+    (req as any).user = user;
     next();
   } catch (err) {
     res.status(401).json({ message: "Invalid token" });

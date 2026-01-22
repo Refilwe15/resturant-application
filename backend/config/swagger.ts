@@ -1,6 +1,6 @@
-const swaggerJsdoc = require("swagger-jsdoc");
+import swaggerJsdoc from "swagger-jsdoc";
 
-const options = {
+const options: swaggerJsdoc.Options = {
   definition: {
     openapi: "3.0.0",
     info: {
@@ -8,10 +8,14 @@ const options = {
       version: "1.0.0",
       description: "API for React Native Restaurant App",
     },
-    servers: [{ url: "http://localhost:8000", description: "Local server" }],
+    servers: [
+      {
+        url: "http://localhost:8000",
+        description: "Local server",
+      },
+    ],
   },
-  apis: ["./routes/*.js"],
+  apis: ["./routes/*.ts"], // change to .ts if your routes are TypeScript
 };
 
-const swaggerSpec = swaggerJsdoc(options);
-module.exports = swaggerSpec;
+export const swaggerSpec = swaggerJsdoc(options);

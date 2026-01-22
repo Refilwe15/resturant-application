@@ -1,52 +1,61 @@
-require("dotenv").config();
+import "dotenv/config";
+import express, { Application, Request, Response } from "express";
+import cors from "cors";
 
-import type { Request, Response } from "express";
+import { sequelize } from "./config/db.ts"; // ← Add .ts
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./config/swagger.ts"; // ← Add .ts
 
-const express = require("express") as typeof import("express");
-const cors = require("cors") as typeof import("cors");
-const { sequelize } = require("./config/db");
-const swaggerUi = require("swagger-ui-express");
-const swaggerSpec = require("./config/swagger");
+// Routes - add .ts to all these imports
+import authRoutes from "./routes/auth.ts";
+import userRoutes from "./routes/users.ts";
+import foodRoutes from "./routes/foods.ts";
+import cartRoutes from "./routes/cart.ts";
+import orderRoutes from "./routes/orders.ts";
 
-const authRoutes = require("./routes/auth");
-const userRoutes = require("./routes/users");
-const foodRoutes = require("./routes/foods");
-const cartRoutes = require("./routes/cart");
-const orderRoutes = require("./routes/orders");
+// App instance
+const app: Application = express();
 
-const app = express();
-
+// ===============================
 // Middleware
+// ===============================
 app.use(cors());
 app.use(express.json());
 
+// ===============================
 // Routes
+// ===============================
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/foods", foodRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 
+// ===============================
 // Swagger UI
+// ===============================
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-
-app.get("/", (req: Request, res: Response): void => {
+// ===============================
+// Test route
+// ===============================
+app.get("/", (req: Request, res: Response) => {
   res.json({ message: "Restaurant API is running" });
 });
 
-// Connect to Postgres
-sequelize
-  .sync({ alter: true })
-  .then(() => {
+// ===============================
+// Database + Server Start
+// ===============================
+(async () => {
+  try {
+    await sequelize.sync({ alter: true });
     console.log("Database connected and synced");
 
     const PORT: number = Number(process.env.PORT) || 8000;
-
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
-  })
-  .catch((err: unknown) => {
+  } catch (err) {
     console.error("DB connection failed:", err);
-  });
+  }
+})();
