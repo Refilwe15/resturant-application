@@ -55,12 +55,20 @@ export default function LoginScreen() {
         <Text style={styles.forgotText}>Forgot your password?</Text>
       </TouchableOpacity>
 
-      {/* Login button */}
+      {/* User Login */}
       <TouchableOpacity
         style={styles.loginBtn}
-        onPress={() => router.replace("../(tabs)")}
+        onPress={() => router.replace("/(tabs)")}
       >
         <Text style={styles.loginText}>Login</Text>
+      </TouchableOpacity>
+
+      {/* Admin Login */}
+      <TouchableOpacity
+        style={styles.adminLogin}
+        onPress={() => router.push("/(admin)/login")}
+      >
+        <Text style={styles.adminLoginText}>Login as Admin</Text>
       </TouchableOpacity>
 
       {/* Register */}
@@ -88,16 +96,14 @@ const styles = StyleSheet.create({
   logo: {
     width: 180,
     height: 180,
-   
     marginBottom: 10,
   },
 
   title: {
     fontSize: 30,
-    fontWeight : 800,
+    fontWeight: "800",
     fontFamily: "PoppinsSemiBold",
     color: "#000",
-    marginBottom: 0,
   },
 
   subtitle: {
@@ -149,13 +155,24 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 24,
+    marginBottom: 14,
   },
 
   loginText: {
     fontSize: 16,
     fontFamily: "PoppinsSemiBold",
     color: "#FFF",
+  },
+
+  adminLogin: {
+    marginBottom: 24,
+  },
+
+  adminLoginText: {
+    fontSize: 13,
+    fontFamily: "PoppinsRegular",
+    color: "#000",
+    textDecorationLine: "underline",
   },
 
   registerWrapper: {
