@@ -1,9 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
@@ -32,7 +27,7 @@ export default function CartScreen() {
     if (geo.length > 0) {
       const place = geo[0];
       setAddress(
-        `${place.street || ""} ${place.name || ""}, ${place.city || ""}`
+        `${place.street || ""} ${place.name || ""}, ${place.city || ""}`,
       );
     }
   };
@@ -51,9 +46,7 @@ export default function CartScreen() {
       {/* Location */}
       <View style={styles.locationBox}>
         <Feather name="truck" size={18} />
-        <Text style={styles.locationText}>
-          Delivering to {address}
-        </Text>
+        <Text style={styles.locationText}>Delivering to {address}</Text>
 
         <TouchableOpacity>
           <Text style={styles.changeText}>Change Location</Text>
@@ -63,12 +56,16 @@ export default function CartScreen() {
       {/* Cart items will go here */}
 
       {/* Checkout */}
-      <TouchableOpacity style={styles.checkoutBtn}>
+      <TouchableOpacity
+        style={styles.checkoutBtn}
+        onPress={() => router.push("/(onboarding)/payment")}
+      >
         <Text style={styles.checkoutText}>CHECK OUT</Text>
       </TouchableOpacity>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
