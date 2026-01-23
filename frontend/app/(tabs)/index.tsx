@@ -10,12 +10,9 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { useState } from "react";
 import { router } from "expo-router";
-
-const categories = ["Burgers", "Sides", "Desserts", "Drinks"];
+import MapView, { Marker } from "react-native-maps";
 
 export default function HomeScreen() {
-  const [activeCategory, setActiveCategory] = useState("Burgers");
-
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Header */}
@@ -28,21 +25,15 @@ export default function HomeScreen() {
       {/* Search */}
       <View style={styles.searchBox}>
         <Feather name="search" size={18} color="#999" />
-        <TextInput
-          placeholder="Search food here"
-          style={styles.searchInput}
-        />
+        <TextInput placeholder="Search food here" style={styles.searchInput} />
       </View>
 
       {/* Promo */}
       <View style={styles.promo}>
         <View>
           <Text style={styles.promoTitle}>Taste Rally</Text>
-          <Text style={styles.promoText}>
-            Burgers Worth Cheering{"\n"}For
-          </Text>
+          <Text style={styles.promoText}>Burgers Worth Cheering{"\n"}For</Text>
 
-          {/* ORDER NOW → MENU TAB */}
           <TouchableOpacity
             style={styles.orderBtn}
             onPress={() => router.push("/(tabs)/menu")}
@@ -57,81 +48,95 @@ export default function HomeScreen() {
         />
       </View>
 
-      {/* Categories */}
-      <Text style={styles.sectionTitle}>Categories</Text>
-      <View style={styles.categories}>
-        {categories.map((item) => (
-          <TouchableOpacity
-            key={item}
-            onPress={() => setActiveCategory(item)}
-            style={styles.categoryItem}
-          >
-            <Text
-              style={[
-                styles.categoryText,
-                activeCategory === item && styles.categoryActiveText,
-              ]}
-            >
-              {item}
-            </Text>
-
-            {activeCategory === item && <View style={styles.activeLine} />}
-          </TouchableOpacity>
-        ))}
-      </View>
-
       {/* Mostly Ordered */}
       <Text style={styles.sectionTitle}>Mostly Ordered</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={styles.foodCard}>
-          <Image
-            source={require("../../assets/images/rb2.png")}
-            style={styles.foodImage}
-          />
-          <Text style={styles.foodName}>Classic Burger</Text>
-          <Text style={styles.foodDesc}>
-            Juicy beef patty with cheese & sauce
-          </Text>
-          <Text style={styles.foodPrice}>R89.99</Text>
-        </View>
+        {FOODS.map((item) => (
+          <View key={item.id} style={styles.foodCard}>
+            <Image source={item.image} style={styles.foodImage} />
 
-        <View style={styles.foodCard}>
-          <Image
-            source={require("../../assets/images/rb1.png")}
-            style={styles.foodImage}
-          />
-          <Text style={styles.foodName}>Double Hamburger</Text>
-          <Text style={styles.foodDesc}>
-            Double beef, extra cheese, special sauce
-          </Text>
-          <Text style={styles.foodPrice}>R180.99</Text>
-        </View>
+            {/* PLUS BUTTON */}
+            <TouchableOpacity style={styles.addBtn}>
+              <Feather name="plus" size={18} color="#FFF" />
+            </TouchableOpacity>
 
-        <View style={styles.foodCard}>
-          <Image
-            source={require("../../assets/images/oreo.png")}
-            style={styles.foodImage}
-          />
-          <Text style={styles.foodName}>Oreo Sundae</Text>
-          <Text style={styles.foodDesc}>
-            Vanilla ice cream with Oreo crumbs
-          </Text>
-          <Text style={styles.foodPrice}>R21.99</Text>
-        </View>
-      </ScrollView>
-
-      {/* Shops */}
-      <Text style={styles.sectionTitle2}>Available Shops For Delivery</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {[1, 2, 3].map((_, i) => (
-          <View key={i} style={styles.shopCard}>
-            <Text style={styles.shopText}>Rally’s Burger</Text>
+            <Text style={styles.foodName}>{item.name}</Text>
+            <Text style={styles.foodDesc}>{item.desc}</Text>
+            <Text style={styles.foodPrice}>{item.price}</Text>
           </View>
         ))}
       </ScrollView>
+
+      {/* MAP */}
+      <Text style={styles.sectionTitle2}>Available Shops For Delivery</Text>
+      <View style={styles.mapWrapper}>
+        <MapView
+          style={styles.map}
+          initialRegion={{
+            latitude: -26.2041,
+            longitude: 28.0473,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          }}
+        >
+          {STORES.map((store) => (
+            <Marker
+              key={store.id}
+              coordinate={store.location}
+              title={store.name}
+            />
+          ))}
+        </MapView>
+      </View>
     </ScrollView>
   );
 }
+
+/* ---------------- DATA ---------------- */
+
+const FOODS = [
+  {
+    id: "1",
+    name: "Classic Burger",
+    desc: "Juicy beef patty with cheese & sauce",
+    price: "R89.99",
+    image: require("../../assets/images/rb2.png"),
+  },
+  {
+    id: "2",
+    name: "Double Hamburger",
+    desc: "Double beef, extra cheese",
+    price: "R180.99",
+    image: require("../../assets/images/rb1.png"),
+  },
+  {
+    id: "3",
+    name: "Oreo Sundae",
+    desc: "Vanilla ice cream with Oreo crumbs",
+    price: "R21.99",
+    image: require("../../assets/images/oreo.png"),
+  },
+];
+
+const STORES = [
+  {
+    id: "1",
+    name: "Rally’s Sandton",
+    location: { latitude: -26.1076, longitude: 28.0567 },
+  },
+  {
+    id: "2",
+    name: "Rally’s Rosebank",
+    location: { latitude: -26.1466, longitude: 28.0421 },
+  },
+  {
+    id: "3",
+    name: "Rally’s Braamfontein",
+    location: { latitude: -26.1929, longitude: 28.0305 },
+  },
+];
+
+/* ---------------- STYLES ---------------- */
 
 const styles = StyleSheet.create({
   container: {
@@ -141,7 +146,6 @@ const styles = StyleSheet.create({
     paddingTop: 55,
   },
 
-  /* Header */
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -154,7 +158,6 @@ const styles = StyleSheet.create({
     color: "#222",
   },
 
-  /* Search Box */
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
@@ -168,96 +171,42 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     flex: 1,
     fontSize: 14,
-    color: "#333",
   },
 
-  /* Promo Section */
   promo: {
     flexDirection: "row",
-    backgroundColor: "#FFF",
     borderRadius: 18,
     padding: 18,
     marginBottom: 24,
     justifyContent: "space-between",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 5,
     elevation: 3,
   },
-  promoTitle: {
-  
-     fontSize: 20,
-    fontWeight: "700",
-    color: "#222",
-  },
-  promoText: {
-   fontSize: 16,
-    color: "#999",
-    marginVertical: 6,
-    lineHeight: 26,
-  },
+  promoTitle: { fontSize: 20, fontWeight: "700" },
+  promoText: { color: "#999", marginVertical: 6 },
   orderBtn: {
     backgroundColor: "#F4B400",
     paddingHorizontal: 18,
     paddingVertical: 10,
     borderRadius: 24,
     marginTop: 16,
-    width : 110
+    width: 110,
   },
-  orderText: {
-    color: "#FFF",
-    fontWeight: "600",
-    fontSize: 14,
-  },
-  mascot: {
-    width: 150,
-    height: 150,
+  orderText: { color: "#FFF", fontWeight: "600" },
+  mascot: { width: 150, height: 150 },
 
-  },
-
-  /* Section Titles */
   sectionTitle: {
     fontSize: 17,
     fontWeight: "700",
-    color: "#222",
     marginBottom: 16,
   },
   sectionTitle2: {
     fontSize: 17,
     fontWeight: "700",
-    color: "#222",
     marginTop: 24,
     marginBottom: 12,
   },
 
-  /* Categories */
-  categories: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 24,
-  },
-  categoryItem: {
-    alignItems: "center",
-  },
-  categoryText: {
-    fontSize: 14,
-    color: "#999",
-  },
-  categoryActiveText: {
-    color: "#222",
-    fontWeight: "700",
-  },
-  activeLine: {
-    width: 24,
-    height: 3,
-    backgroundColor: "#F4B400",
-    borderRadius: 2,
-    marginTop: 6,
-  },
-
-  /* Food Cards */
   foodCard: {
     width: 160,
     backgroundColor: "#FFF",
@@ -266,54 +215,42 @@ const styles = StyleSheet.create({
     marginRight: 16,
     borderWidth: 1,
     borderColor: "#F4B400",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 5,
-    elevation: 3,
   },
   foodImage: {
     width: "100%",
     height: 90,
     borderRadius: 12,
   },
+  addBtn: {
+    position: "absolute",
+    right: 10,
+    top: 10,
+    backgroundColor: "#F4B400",
+    borderRadius: 16,
+    padding: 6,
+  },
   foodName: {
     fontWeight: "700",
-    fontSize: 15,
-    color: "#222",
     marginTop: 8,
   },
   foodDesc: {
     fontSize: 12,
     color: "#777",
-    marginVertical: 4,
-    lineHeight: 16,
   },
   foodPrice: {
     color: "#F4B400",
     fontWeight: "700",
-    fontSize: 14,
     marginTop: 4,
   },
 
-  /* Shops */
-  shopCard: {
-    backgroundColor: "#FFF4D6",
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 16,
-    marginRight: 16,
-    marginTop: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.03,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
+  mapWrapper: {
+    height: 220,
+    borderRadius: 18,
+    overflow: "hidden",
+    marginBottom: 30,
   },
-  shopText: {
-    fontWeight: "600",
-    fontSize: 14,
-    color: "#222",
+  map: {
+    width: "100%",
+    height: "100%",
   },
 });
-
