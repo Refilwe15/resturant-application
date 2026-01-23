@@ -289,7 +289,6 @@ export default function MenuScreen() {
                     Add to Cart • R{totalPrice}
                   </Text>
                 </TouchableOpacity>
-                
 
                 <TouchableOpacity onPress={() => setSelectedItem(null)}>
                   <Text style={styles.closeText}>Close</Text>
@@ -474,7 +473,7 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: 16,
     marginBottom: 12,
-    marginLeft : 80,
+    marginLeft: 80,
   },
 
   modalTitle: {
@@ -531,5 +530,4 @@ const styles = StyleSheet.create({
     color: "#999",
     marginTop: 8,
   },
-  
 });

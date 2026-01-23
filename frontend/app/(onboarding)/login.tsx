@@ -63,13 +63,7 @@ export default function LoginScreen() {
         <Text style={styles.loginText}>Login</Text>
       </TouchableOpacity>
 
-      {/* Admin Login */}
-      <TouchableOpacity
-        style={styles.adminLogin}
-        onPress={() => router.push("/(admin)/login")}
-      >
-        <Text style={styles.adminLoginText}>Login as Admin</Text>
-      </TouchableOpacity>
+
 
       {/* Register */}
       <View style={styles.registerWrapper}>
