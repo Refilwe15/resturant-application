@@ -5,26 +5,60 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from "react-native";
+import { useState } from "react";
 import { router } from "expo-router";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
 
 export default function LoginScreen() {
+  // State to hold form values
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please enter email and password");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://10.0.0.113:8000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        Alert.alert("Login failed", data.message || "Invalid credentials");
+        return;
+      }
+
+      // Login successful
+      Alert.alert("Success", "Logged in successfully!");
+      // Optionally, save token in AsyncStorage for later API calls
+      // await AsyncStorage.setItem("token", data.token);
+
+      router.replace("/(tabs)"); // Navigate to main app
+    } catch (err) {
+      console.log(err);
+      Alert.alert("Error", "Unable to login. Try again.");
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {/* Logo */}
       <Image
         source={require("../../assets/images/login.png")}
         style={styles.logo}
       />
 
-      {/* Title */}
       <Text style={styles.title}>Hello</Text>
 
-      {/* Subtitle */}
       <Text style={styles.subtitle}>
-        Sign in your account because good food{"\n"}
-        deserves easy access.
+        Sign in your account because good food{"\n"}deserves easy access.
       </Text>
 
       {/* Email */}
@@ -36,6 +70,8 @@ export default function LoginScreen() {
           style={styles.input}
           keyboardType="email-address"
           autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
         />
       </View>
 
@@ -47,6 +83,8 @@ export default function LoginScreen() {
           placeholderTextColor="#B8B8B8"
           secureTextEntry
           style={styles.input}
+          value={password}
+          onChangeText={setPassword}
         />
       </View>
 
@@ -56,14 +94,9 @@ export default function LoginScreen() {
       </TouchableOpacity>
 
       {/* User Login */}
-      <TouchableOpacity
-        style={styles.loginBtn}
-        onPress={() => router.replace("/(tabs)")}
-      >
+      <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
         <Text style={styles.loginText}>Login</Text>
       </TouchableOpacity>
-
-
 
       {/* Register */}
       <View style={styles.registerWrapper}>
@@ -73,7 +106,6 @@ export default function LoginScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Indicator */}
       <View style={styles.indicator} />
     </View>
   );

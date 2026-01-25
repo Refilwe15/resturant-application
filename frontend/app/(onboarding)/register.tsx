@@ -5,35 +5,85 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from "react-native";
+import { useState } from "react";
 import { router } from "expo-router";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
 
 export default function RegisterScreen() {
+  // State to hold form values
+  const [name, setName] = useState("");
+  const [surname, setSurname] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const handleRegister = async () => {
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://10.0.0.113:8000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          surname,
+          email,
+          password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        Alert.alert("Registration failed", data.error || "Unknown error");
+        return;
+      }
+
+      Alert.alert("Success", "Account created successfully!");
+      router.replace("/(tabs)"); // Navigate to main app
+    } catch (err) {
+      console.log(err);
+      Alert.alert("Error", "Unable to register. Try again.");
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {/* Logo */}
       <Image
         source={require("../../assets/images/login.png")}
         style={styles.logo}
       />
-
-      {/* Title */}
       <Text style={styles.title}>Create Account</Text>
-
-      {/* Subtitle */}
       <Text style={styles.subtitle}>
-        Sign up to enjoy delicious meals{"\n"}
-        delivered to your doorstep.
+        Sign up to enjoy delicious meals{"\n"}delivered to your doorstep.
       </Text>
 
       {/* Name */}
       <View style={styles.inputWrapper}>
         <Feather name="user" size={20} color="#B8B8B8" />
         <TextInput
-          placeholder="Full Name"
+          placeholder="First Name"
           placeholderTextColor="#B8B8B8"
           style={styles.input}
+          value={name}
+          onChangeText={setName}
+        />
+      </View>
+
+      {/* Surname */}
+      <View style={styles.inputWrapper}>
+        <Feather name="user" size={20} color="#B8B8B8" />
+        <TextInput
+          placeholder="Surname"
+          placeholderTextColor="#B8B8B8"
+          style={styles.input}
+          value={surname}
+          onChangeText={setSurname}
         />
       </View>
 
@@ -46,6 +96,8 @@ export default function RegisterScreen() {
           style={styles.input}
           keyboardType="email-address"
           autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
         />
       </View>
 
@@ -57,6 +109,8 @@ export default function RegisterScreen() {
           placeholderTextColor="#B8B8B8"
           secureTextEntry
           style={styles.input}
+          value={password}
+          onChangeText={setPassword}
         />
       </View>
 
@@ -68,18 +122,16 @@ export default function RegisterScreen() {
           placeholderTextColor="#B8B8B8"
           secureTextEntry
           style={styles.input}
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
         />
       </View>
 
       {/* Register button */}
-      <TouchableOpacity
-        style={styles.registerBtn}
-        onPress={() => router.replace("/(tabs)")}
-      >
+      <TouchableOpacity style={styles.registerBtn} onPress={handleRegister}>
         <Text style={styles.registerText}>Register</Text>
       </TouchableOpacity>
 
-      {/* Login */}
       <View style={styles.loginWrapper}>
         <Text style={styles.loginText}>Already have an account?</Text>
         <TouchableOpacity onPress={() => router.back()}>
@@ -87,7 +139,6 @@ export default function RegisterScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Indicator */}
       <View style={styles.indicator} />
     </View>
   );
@@ -98,7 +149,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
-    paddingTop : 80,
+    paddingTop: 80,
   },
 
   logo: {

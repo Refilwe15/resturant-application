@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rally’s Burger | Orders</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: #f4f6f9;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: #fff;
+      padding: 30px 20px;
+      border-right: 1px solid #e5e7eb;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 40px;
+      color: #ef4444;
+      font-weight: 700;
+    }
+
+    .sidebar ul {
+      list-style: none;
+    }
+
+    .sidebar li {
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .sidebar li.active,
+    .sidebar li:hover {
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    /* Main */
+    .main {
+      flex: 1;
+      padding: 30px;
+    }
+
+    .header {
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    /* Section Card */
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 14px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+      margin-bottom: 30px;
+    }
+
+    .card h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: #f1f5f9;
+    }
+
+    th, td {
+      padding: 14px;
+      font-size: 14px;
+      text-align: left;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #eee;
+    }
+
+    .status.open {
+      color: #f59e0b;
+      font-weight: 600;
+    }
+
+    .status.completed {
+      color: #16a34a;
+      font-weight: 600;
+    }
+
+    .status.cancelled {
+      color: #ef4444;
+      font-weight: 600;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>Rally’s Burger</h2>
+    <ul>
+      <li onclick="location.href='index.html'">Dashboard</li>
+      <li class="active">Orders</li>
+      <li>Menu</li>
+      <li>Customers</li>
+      <li>Reports</li>
+      <li>Settings</li>
+      <li>Logout</li>
+    </ul>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <div class="header">
+      <h1>Orders</h1>
+    </div>
+
+    <!-- Open Orders -->
+    <div class="card">
+      <h2>Open Orders</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Phone</th>
+            <th>Total</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>#30211</td>
+            <td>Sarah Johnson</td>
+            <td>+27 72 445 8891</td>
+            <td>$24.00</td>
+            <td class="status open">Open</td>
+          </tr>
+          <tr>
+            <td>#30215</td>
+            <td>Michael Brown</td>
+            <td>+27 61 332 7742</td>
+            <td>$18.50</td>
+            <td class="status open">Open</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Order History -->
+    <div class="card">
+      <h2>Order History</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Date</th>
+            <th>Total</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>#29890</td>
+            <td>James Wilson</td>
+            <td>12 Jan 2026</td>
+            <td>$32.00</td>
+            <td class="status completed">Completed</td>
+          </tr>
+          <tr>
+            <td>#29744</td>
+            <td>Emily Clark</td>
+            <td>10 Jan 2026</td>
+            <td>$15.00</td>
+            <td class="status cancelled">Cancelled</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Rally’s Burger | Customers</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Poppins", sans-serif;
+      }
+
+      body {
+        background: #f4f6f9;
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        width: 260px;
+        background: #fff;
+        padding: 30px 20px;
+        border-right: 1px solid #e5e7eb;
+      }
+
+      .sidebar h2 {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #ef4444;
+        font-weight: 700;
+      }
+
+      .sidebar li {
+        list-style: none;
+        padding: 14px 16px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        font-weight: 500;
+        color: #374151;
+      }
+
+      .sidebar li.active,
+      .sidebar li:hover {
+        background: #f3f4f6;
+        color: #111827;
+      }
+
+      /* Main */
+      .main {
+        flex: 1;
+        padding: 30px;
+      }
+
+      .header {
+        margin-bottom: 30px;
+      }
+
+      .header h1 {
+        font-size: 26px;
+        font-weight: 700;
+      }
+
+      /* Card */
+      .card {
+        background: #fff;
+        padding: 20px;
+        border-radius: 14px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      thead {
+        background: #f1f5f9;
+      }
+
+      th,
+      td {
+        padding: 14px;
+        font-size: 14px;
+        text-align: left;
+      }
+
+      tbody tr {
+        border-bottom: 1px solid #eee;
+      }
+
+      tbody tr:last-child {
+        border-bottom: none;
+      }
+
+      .badge {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .active {
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      .inactive {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      @media (max-width: 900px) {
+        .sidebar {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2>Rally’s Burger</h2>
+      <ul>
+        <li onclick="location.href = 'index.html'">Dashboard</li>
+        <li onclick="location.href = 'orders.html'">Orders</li>
+        <li onclick="location.href = 'menu.html'">Menu</li>
+        <li class="active">Customers</li>
+        <li>Reports</li>
+        <li>Settings</li>
+        <li>Logout</li>
+      </ul>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+      <div class="header">
+        <h1>Registered Customers</h1>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Full Name</th>
+              <th>Email</th>
+
+              <th>Joined</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody id="customerTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      // Example customers (replace later with real registration data)
+      const customers = JSON.parse(localStorage.getItem("customers")) || [
+        {
+          name: "Sarah Johnson",
+          email: "sarah@gmail.com",
+
+          joined: "12 Jan 2026",
+          status: "Active",
+        },
+        {
+          name: "Michael Brown",
+          email: "michael@gmail.com",
+
+          joined: "10 Jan 2026",
+          status: "Active",
+        },
+        {
+          name: "Emily Clark",
+          email: "emily@gmail.com",
+
+          joined: "08 Jan 2026",
+          status: "Inactive",
+        },
+      ];
+
+      localStorage.setItem("customers", JSON.stringify(customers));
+
+      const table = document.getElementById("customerTable");
+
+      customers.forEach((customer, index) => {
+        table.innerHTML += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${customer.name}</td>
+        <td>${customer.email}</td>
+    
+        <td>${customer.joined}</td>
+        <td>
+          <span class="badge ${customer.status === "Active" ? "active" : "inactive"}">
+            ${customer.status}
+          </span>
+        </td>
+      </tr>
+    `;
+      });
+    </script>
+  </body>
+</html>
