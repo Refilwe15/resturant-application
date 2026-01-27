@@ -5,10 +5,10 @@ import { useAuth } from "../../context/AuthContext";
 export default function TabsLayout() {
   const { user, loading } = useAuth();
 
-  // ⏳ While restoring session
+  //  While restoring session
   if (loading) return null;
 
-  // 🔒 Not logged in → go to login
+  //  Not logged in → go to login
   if (!user) {
     return <Redirect href="../../(onboarding)/login" />;
   }

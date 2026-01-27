@@ -36,13 +36,13 @@ export default function MenuScreen() {
   const [qty, setQty] = useState(1);
   const [notes, setNotes] = useState("");
   const [extras, setExtras] = useState<any[]>([]);
-  const { addToCart } = useCart(); // ✅ Cart hook
+  const { addToCart } = useCart(); // Cart hook
 
   // -------------------- Fetch foods --------------------
   useEffect(() => {
     const fetchFoods = async () => {
       try {
-        const res = await fetch("http://10.0.0.113:8000/api/foods");
+        const res = await fetch("http://10.196.0.142:8000/api/foods");
         const data = await res.json();
 
         const categorized: Record<string, any[]> = {
@@ -104,7 +104,7 @@ export default function MenuScreen() {
   const renderItem = ({ item }: any) => (
     <View style={styles.card}>
       <Image
-        source={{ uri: `http://10.0.0.113:8000${item.image}` }}
+        source={{ uri: `http://10.196.0.142:8000${item.image}` }}
         style={styles.image}
       />
       <Text style={styles.name}>{item.name}</Text>
@@ -182,7 +182,7 @@ export default function MenuScreen() {
             {selectedItem && (
               <>
                 <Image
-                  source={{ uri: `http://10.0.0.113:8000/${selectedItem.image}` }}
+                  source={{ uri: `http://10.196.0.142:8000/${selectedItem.image}` }}
                   style={styles.modalImage}
                 />
                 <Text style={styles.modalTitle}>{selectedItem.name}</Text>

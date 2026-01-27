@@ -16,7 +16,7 @@ import {
 } from "@stripe/stripe-react-native";
 
 // Replace with your actual backend URL
-const BACKEND_URL = "http://10.0.0.113:8000/api/payment/create-payment-intent";
+const BACKEND_URL = "http://10.196.0.142:8000/api/payment/create-payment-intent";
 
 export default function PaymentScreen() {
   const [method, setMethod] = useState<"card" | "cash">("card");

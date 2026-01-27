@@ -10,24 +10,21 @@ import {
 } from "react-native";
 import { useState } from "react";
 import { router } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
-
-// 🔥 CHANGE BASED ON ENV
-const API_URL = "http://10.0.0.113:8000/api/auth/register";
-// Android emulator ↑
-// iOS simulator → http://localhost:8000
+import { useAuth } from "../../context/AuthContext";
 
 export default function RegisterScreen() {
   const [name, setName] = useState("");
-  const [surname, setSurname] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { register } = useAuth();
 
   const handleRegister = async () => {
-    if (!name || !surname || !email || !password || !confirmPassword) {
+
+    if (!name || !contactNumber || !email || !password || !confirmPassword) {
       Alert.alert("Error", "All fields are required");
       return;
     }
@@ -40,36 +37,16 @@ export default function RegisterScreen() {
     setLoading(true);
 
     try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          surname,
-          email,
-          password,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        Alert.alert("Registration failed", data.message || "Try again");
-        setLoading(false);
-        return;
-      }
-
-      // ✅ Optional: save token if backend returns it
-      if (data.token) {
-        await AsyncStorage.setItem("token", data.token);
-        await AsyncStorage.setItem("user", JSON.stringify(data.user));
-      }
-
-      Alert.alert("Success", "Account created successfully!");
-      router.replace("../../(tabs)/index");
+      await register(name, "", email, password);
+      Alert.alert("Success", "Account created successfully!", [
+        {
+          text: "OK",
+          onPress: () => router.replace("../(tabs)"),
+        },
+      ]);
     } catch (error) {
       console.log(error);
-      Alert.alert("Error", "Server unreachable");
+      Alert.alert("Error", error instanceof Error ? error.message : "Server unreachable");
     } finally {
       setLoading(false);
     }
@@ -89,21 +66,25 @@ export default function RegisterScreen() {
 
       <View style={styles.inputWrapper}>
         <Feather name="user" size={20} color="#B8B8B8" />
-        <TextInput
-          placeholder="First Name"
-          style={styles.input}
-          value={name}
-          onChangeText={setName}
-        />
+      <TextInput
+      placeholder="First Name"
+      style={styles.input}
+      value={name}
+      onChangeText={setName}
+      placeholderTextColor="#999" 
+/>
+
       </View>
 
       <View style={styles.inputWrapper}>
-        <Feather name="user" size={20} color="#B8B8B8" />
+        <Feather name="phone" size={20} color="#B8B8B8" />
         <TextInput
-          placeholder="Surname"
+          placeholder="Cell Number"
           style={styles.input}
-          value={surname}
-          onChangeText={setSurname}
+          value={contactNumber}
+          onChangeText={setContactNumber}
+          placeholderTextColor="#999"
+          keyboardType="phone-pad"
         />
       </View>
 
@@ -115,6 +96,7 @@ export default function RegisterScreen() {
           autoCapitalize="none"
           keyboardType="email-address"
           value={email}
+          placeholderTextColor="#999"
           onChangeText={setEmail}
         />
       </View>
@@ -126,6 +108,7 @@ export default function RegisterScreen() {
           secureTextEntry
           style={styles.input}
           value={password}
+          placeholderTextColor="#999"
           onChangeText={setPassword}
         />
       </View>
@@ -137,6 +120,7 @@ export default function RegisterScreen() {
           secureTextEntry
           style={styles.input}
           value={confirmPassword}
+          placeholderTextColor="#999"
           onChangeText={setConfirmPassword}
         />
       </View>
@@ -159,6 +143,9 @@ export default function RegisterScreen() {
           <Text style={styles.loginLink}> Login</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Bottom dot */}
+            <View style={styles.dot} />
     </View>
   );
 }
@@ -182,7 +169,6 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     fontFamily: "PoppinsSemiBold",
     color: "#000",
-    marginBottom: 0,
   },
 
   subtitle: {
@@ -192,6 +178,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 22,
     marginBottom: 30,
+  },
+    dot: {
+    position: "absolute",
+    left: 4,
+    width: 60,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#F4B400",
+    bottom: 100,
   },
 
   inputWrapper: {
@@ -207,13 +202,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
-  input: {
-    flex: 1,
-    marginLeft: 10,
-    fontSize: 14,
-    fontFamily: "PoppinsRegular",
-    color: "#000",
-  },
+ input: {
+  flex: 1,
+  marginLeft: 10,
+  fontSize: 14,
+  fontFamily: "PoppinsRegular",
+  color: "#000",
+},
+
 
   registerBtn: {
     width: "60%",
@@ -247,15 +243,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "PoppinsSemiBold",
     color: "#F4B400",
-  },
-
-  indicator: {
-    position: "absolute",
-    bottom: 90,
-    left: 40,
-    width: 60,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: "#F4B400",
   },
 });

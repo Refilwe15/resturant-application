@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 export class User extends Model {
   public id!: string;
   public name!: string;
-  public surname!: string;
+  public surname?: string;
   public email!: string;
   public password!: string;
   public contactNumber?: string;
@@ -31,7 +31,7 @@ User.init(
     },
     surname: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     email: {
       type: DataTypes.STRING,

@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = "http://10.0.0.113:8000/api/auth";
+  const API_URL = "http://10.196.0.142:8000/api/auth";
 
   // 🔁 Restore session
   useEffect(() => {
@@ -83,8 +83,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Registration failed");
 
-    // Auto-login after register
-    await login(email, password);
+    setToken(data.token);
+    setUser(data.user);
+
+    await AsyncStorage.setItem("token", data.token);
+    await AsyncStorage.setItem("user", JSON.stringify(data.user));
+
+    router.replace("../../(tabs)");
   };
 
   const logout = async () => {

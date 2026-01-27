@@ -15,8 +15,8 @@ import { router } from "expo-router";
 import MapView, { Marker } from "react-native-maps";
 import { useCart } from "../../context/CartContext";
 
-/* 🔥 CHANGE TO YOUR LAPTOP IP */
-const BASE_URL = "http://10.0.0.113:8000";
+/* CHANGE TO YOUR LAPTOP IP */
+const BASE_URL = "http://10.196.0.142:8000";
 const FOOD_ENDPOINT = `${BASE_URL}/api/foods`;
 
 /* -------------------- EXTRAS ---------------- */
@@ -142,7 +142,7 @@ export default function HomeScreen() {
 
               <TouchableOpacity
                 style={styles.addBtn}
-                onPress={() => openModal(item)} // ✅ open modal like Menu
+                onPress={() => openModal(item)} // open modal like Menu
               >
                 <Feather name="plus" size={18} color="#FFF" />
               </TouchableOpacity>

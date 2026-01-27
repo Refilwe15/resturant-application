@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -5,11 +6,14 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+  TextInput,
+  Alert,
+  Platform,
+  ScrollView,
 } from "react-native";
 import { Feather, Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Location from "expo-location";
 
 /* -------------------- TYPES -------------------- */
 type User = {
@@ -17,37 +21,207 @@ type User = {
   name: string;
   surname: string;
   email: string;
+  address?: string;
+  cardDetails?: string;
 };
 
-/* -------------------- SCREEN -------------------- */
+/* -------------------- MAIN PROFILE SCREEN -------------------- */
 export default function ProfileScreen() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Load logged-in user from storage
+  // Tab control: 'info', 'address', 'edit', 'payment'
+  const [activeTab, setActiveTab] = useState<"info" | "address" | "edit" | "payment">("info");
+
+  // Form states for editing profile
+  const [name, setName] = useState("");
+  const [surname, setSurname] = useState("");
+  const [email, setEmail] = useState("");
+
+  // Address state
+  const [address, setAddress] = useState("");
+
+  // Payment state
+  const [cardDetails, setCardDetails] = useState("");
+
+  /* Load user data from storage on mount */
   useEffect(() => {
     const loadUser = async () => {
       const storedUser = await AsyncStorage.getItem("user");
 
       if (!storedUser) {
-        router.replace("/(onboarding)");
+        // Redirect to onboarding if no user
         return;
       }
 
-      setUser(JSON.parse(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      setName(parsedUser.name || "");
+      setSurname(parsedUser.surname || "");
+      setEmail(parsedUser.email || "");
+      setAddress(parsedUser.address || "");
+      setCardDetails(parsedUser.cardDetails || "");
       setLoading(false);
     };
 
     loadUser();
   }, []);
 
-  // 🔹 Logout
+  /* -------------------- LOGOUT -------------------- */
   const handleLogout = async () => {
     await AsyncStorage.multiRemove(["token", "user"]);
-    router.replace("/(onboarding)");
+    // You can also navigate out here if using router
+    // router.replace("/(onboarding)");
+    setUser(null);
+    setActiveTab("info");
   };
 
-  // 🔹 Loading state
+  /* -------------------- ADDRESS -------------------- */
+  const useCurrentLocation = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission denied");
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+
+      const places = await Location.reverseGeocodeAsync(location.coords);
+
+      if (places.length > 0) {
+        const place = places[0];
+        const formatted = `${place.name ?? ""} ${
+          place.street ?? ""
+        }, ${place.city ?? ""}, ${place.region ?? ""}`;
+        setAddress(formatted);
+      }
+    } catch (err) {
+      console.log(err);
+      Alert.alert("Error", "Failed to get current location");
+    }
+  };
+
+  const saveAddress = async () => {
+    if (!address) {
+      Alert.alert("Address required");
+      return;
+    }
+
+    const token = await AsyncStorage.getItem("token");
+    if (!token) {
+      Alert.alert("Not authenticated");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://10.196.0.142:8000/api/users/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ address }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        Alert.alert("Error", data.message || "Failed to update address");
+        return;
+      }
+
+      await AsyncStorage.setItem("user", JSON.stringify(data.user));
+      setUser(data.user);
+      Alert.alert("Success", "Address updated");
+      setActiveTab("info");
+    } catch (err) {
+      console.log(err);
+      Alert.alert("Error", "Server unreachable");
+    }
+  };
+
+  /* -------------------- EDIT PROFILE -------------------- */
+  const handleSaveProfile = async () => {
+    if (!name || !surname || !email) {
+      Alert.alert("Please fill all fields");
+      return;
+    }
+
+    const token = await AsyncStorage.getItem("token");
+    if (!token) {
+      Alert.alert("Not authenticated");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://10.196.0.142:8000/api/users/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name, surname, email }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        Alert.alert("Error", data.message || "Update failed");
+        return;
+      }
+
+      await AsyncStorage.setItem("user", JSON.stringify(data.user));
+      setUser(data.user);
+      Alert.alert("Success", "Profile updated");
+      setActiveTab("info");
+    } catch (err) {
+      Alert.alert("Error", "Something went wrong");
+    }
+  };
+
+  /* -------------------- PAYMENT -------------------- */
+  const saveCard = async () => {
+    if (!cardDetails) {
+      Alert.alert("Enter card details");
+      return;
+    }
+
+    const token = await AsyncStorage.getItem("token");
+    if (!token) {
+      Alert.alert("Not authenticated");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://10.196.0.142:8000/api/users/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ cardDetails }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        Alert.alert("Error", "Failed to update card");
+        return;
+      }
+
+      await AsyncStorage.setItem("user", JSON.stringify(data.user));
+      setUser(data.user);
+      Alert.alert("Success", "Payment method updated");
+      setActiveTab("info");
+    } catch (err) {
+      Alert.alert("Error", "Failed to update card");
+    }
+  };
+
+  /* -------------------- LOADING -------------------- */
   if (loading) {
     return (
       <View style={styles.loading}>
@@ -56,73 +230,178 @@ export default function ProfileScreen() {
     );
   }
 
-  return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Feather name="arrow-left" size={22} color="#222" />
-        </TouchableOpacity>
+  /* -------------------- TAB COMPONENTS -------------------- */
 
-        <Text style={styles.headerTitle}>Profile</Text>
+  // Default info tab
+  if (activeTab === "info") {
+    return (
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => {}}>
+            <Feather name="arrow-left" size={22} color="#222" />
+          </TouchableOpacity>
 
-        <TouchableOpacity>
-          <Feather name="refresh-cw" size={20} color="#222" />
+          <Text style={styles.headerTitle}>Profile</Text>
+
+          <TouchableOpacity onPress={() => setActiveTab("info")}>
+            <Feather name="refresh-cw" size={20} color="#222" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Profile Image */}
+        <Image
+          source={require("../../assets/images/profile.png")}
+          style={styles.avatar}
+        />
+
+        {/* User Data */}
+        <Text style={styles.name}>
+          {user?.name} {user?.surname}
+        </Text>
+        <Text style={styles.email}>{user?.email}</Text>
+        <Text style={{ textAlign: "center", marginVertical: 10, color: "#555" }}>
+          Address: {user?.address || "Not set"}
+        </Text>
+        <Text style={{ textAlign: "center", marginBottom: 10, color: "#555" }}>
+          Card: {user?.cardDetails ? "**** **** **** " + user.cardDetails.slice(-4) : "Not set"}
+        </Text>
+
+        {/* Menu */}
+        <View style={styles.menu}>
+          <ProfileItem
+            icon="receipt-outline"
+            title="Order History"
+            subtitle="Order Information"
+            onPress={() => Alert.alert("Coming Soon", "Order History feature coming soon")}
+          />
+          <ProfileItem
+            icon="card-outline"
+            title="Payment Methods"
+            subtitle="Pay Your Bill"
+            onPress={() => setActiveTab("payment")}
+          />
+          <ProfileItem
+            icon="location-outline"
+            title="Delivery Addresses"
+            subtitle="Your Delivery Addresses"
+            onPress={() => setActiveTab("address")}
+          />
+          <ProfileItem
+            icon="create-outline"
+            title="Edit Profile"
+            subtitle="Update your info"
+            onPress={() => setActiveTab("edit")}
+          />
+        </View>
+
+        {/* Logout */}
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={18} color="#FFF" />
+          <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       </View>
+    );
+  }
 
-      {/* Profile Image */}
-      <Image
-        source={require("../../assets/images/profile.png")}
-        style={styles.avatar}
-      />
+  /* -------------------- ADDRESS TAB -------------------- */
+  if (activeTab === "address") {
+    return (
+      <ScrollView style={styles.container}>
+        <Text style={styles.title}>Delivery Address</Text>
 
-      {/* ✅ REAL USER DATA */}
-      <Text style={styles.name}>
-        {user?.name} {user?.surname}
-      </Text>
-      <Text style={styles.email}>{user?.email}</Text>
-
-      {/* Edit Profile */}
-      <TouchableOpacity
-        style={styles.editBtn}
-        onPress={() => router.push("/(tabs)/profile/edit")}
-      >
-        <Text style={styles.editText}>Edit Profile</Text>
-      </TouchableOpacity>
-
-      {/* Menu */}
-      <View style={styles.menu}>
-        <ProfileItem
-          icon="receipt-outline"
-          title="Order History"
-          subtitle="Order Information"
-        />
-        <ProfileItem
-          icon="card-outline"
-          title="Payment Methods"
-          subtitle="Pay Your Bill"
-          onPress={() => router.push("/(tabs)/profile/payment")}
+        <TextInput
+          style={styles.input}
+          placeholder="Enter delivery address"
+          value={address}
+          onChangeText={setAddress}
         />
 
-        <ProfileItem
-          icon="location-outline"
-          title="Delivery Addresses"
-          subtitle="Your Delivery Addresses"
-          onPress={() => router.push("/(tabs)/profile/address")}
-        />
-      </View>
+        <TouchableOpacity style={styles.locationBtn} onPress={useCurrentLocation}>
+          <Text style={styles.locationText}>Use Current Location</Text>
+        </TouchableOpacity>
 
-      {/* Logout */}
-      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-        <Ionicons name="log-out-outline" size={18} color="#FFF" />
-        <Text style={styles.logoutText}>Logout</Text>
-      </TouchableOpacity>
-    </View>
-  );
+        <TouchableOpacity style={styles.saveBtn} onPress={saveAddress}>
+          <Text style={styles.saveText}>Save Address</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.saveBtn, { backgroundColor: "#ccc", marginTop: 10 }]}
+          onPress={() => setActiveTab("info")}
+        >
+          <Text style={[styles.saveText, { color: "#333" }]}>Cancel</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    );
+  }
+
+  /* -------------------- EDIT PROFILE TAB -------------------- */
+  if (activeTab === "edit") {
+    return (
+      <ScrollView style={styles.container}>
+        <Text style={styles.title}>Edit Profile</Text>
+
+        <TextInput style={styles.input} placeholder="Name" value={name} onChangeText={setName} />
+        <TextInput
+          style={styles.input}
+          placeholder="Surname"
+          value={surname}
+          onChangeText={setSurname}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+        />
+
+        <TouchableOpacity style={styles.saveBtn} onPress={handleSaveProfile}>
+          <Text style={styles.saveText}>Save Changes</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.saveBtn, { backgroundColor: "#ccc", marginTop: 10 }]}
+          onPress={() => setActiveTab("info")}
+        >
+          <Text style={[styles.saveText, { color: "#333" }]}>Cancel</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    );
+  }
+
+  /* -------------------- PAYMENT TAB -------------------- */
+  if (activeTab === "payment") {
+    return (
+      <ScrollView style={styles.container}>
+        <Text style={styles.title}>Payment Method</Text>
+
+        <TextInput
+          placeholder="Card Number"
+          style={styles.input}
+          value={cardDetails}
+          onChangeText={setCardDetails}
+          keyboardType="numeric"
+        />
+
+        <TouchableOpacity style={styles.saveBtn} onPress={saveCard}>
+          <Text style={styles.saveText}>Save</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.saveBtn, { backgroundColor: "#ccc", marginTop: 10 }]}
+          onPress={() => setActiveTab("info")}
+        >
+          <Text style={[styles.saveText, { color: "#333" }]}>Cancel</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    );
+  }
+
+  return null;
 }
 
-/* -------------------- REUSABLE ITEM -------------------- */
+/* -------------------- REUSABLE PROFILE ITEM -------------------- */
 function ProfileItem({
   icon,
   title,
@@ -263,5 +542,42 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 14,
     marginLeft: 8,
+  },
+
+  input: {
+    borderWidth: 1,
+    borderColor: "#EEE",
+    borderRadius: 14,
+    padding: Platform.OS === "ios" ? 12 : 10,
+    height: 45,
+    marginBottom: 12,
+  },
+
+  title: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#222",
+    marginBottom: 20,
+  },
+
+  locationBtn: {
+    marginTop: 12,
+    alignItems: "center",
+  },
+  locationText: {
+    color: "#D9A441",
+    fontWeight: "600",
+  },
+
+  saveBtn: {
+    backgroundColor: "#D9A441",
+    padding: 16,
+    borderRadius: 18,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  saveText: {
+    color: "#FFF",
+    fontWeight: "700",
   },
 });

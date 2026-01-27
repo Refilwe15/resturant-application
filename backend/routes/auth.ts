@@ -12,8 +12,27 @@ const router = express.Router();
  */
 router.post("/register", async (req: Request, res: Response): Promise<void> => {
   try {
-    await User.create(req.body);
-    res.status(201).json({ message: "User registered" });
+    const user = await User.create(req.body);
+
+    if (!process.env.JWT_SECRET) {
+      res.status(500).json({ message: "JWT secret not configured" });
+      return;
+    }
+
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.status(201).json({ 
+      message: "User registered",
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+      }
+    });
   } catch (err: unknown) {
     if (err instanceof Error) {
       res.status(400).json({ error: err.message });

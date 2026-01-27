@@ -13,8 +13,8 @@ import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
 
-// 🔥 CHANGE THIS BASED ON YOUR ENV
-const API_URL = "http://10.0.0.113:8000/api/auth/login";
+// 🔥 CHANGE BASED ON ENV
+const API_URL = "http://10.196.0.142:8000/api/auth/login";
 // Android emulator ↑
 // iOS simulator → http://localhost:8000
 
@@ -42,16 +42,15 @@ export default function LoginScreen() {
 
       if (!res.ok) {
         Alert.alert("Login failed", data.message || "Invalid credentials");
-        setLoading(false);
         return;
       }
 
-      // ✅ SAVE TOKEN
+      //  Save auth data
       await AsyncStorage.setItem("token", data.token);
       await AsyncStorage.setItem("user", JSON.stringify(data.user));
 
-      // ✅ GO TO TABS
-      router.replace("/(tabs)");
+      //  Navigate to app tabs (loads (tabs)/index.tsx)
+      router.replace("../(tabs)");
     } catch (error) {
       console.log(error);
       Alert.alert("Error", "Server unreachable");
@@ -81,6 +80,7 @@ export default function LoginScreen() {
           autoCapitalize="none"
           keyboardType="email-address"
           value={email}
+          placeholderTextColor="#999"
           onChangeText={setEmail}
         />
       </View>
@@ -92,6 +92,7 @@ export default function LoginScreen() {
           secureTextEntry
           style={styles.input}
           value={password}
+          placeholderTextColor="#999"
           onChangeText={setPassword}
         />
       </View>
@@ -114,25 +115,40 @@ export default function LoginScreen() {
 
       <View style={styles.registerWrapper}>
         <Text style={styles.registerText}>Don’t have an account?</Text>
-        <TouchableOpacity onPress={() => router.push("/(onboarding)/register")}>
+        <TouchableOpacity
+          onPress={() => router.push("/(onboarding)/register")}
+        >
           <Text style={styles.registerLink}> Register Now</Text>
         </TouchableOpacity>
       </View>
+
+       {/* Bottom dot */}
+            <View style={styles.dot} />
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
-    paddingTop: 80,
+    paddingTop: 120,
   },
 
   logo: {
     width: 180,
     height: 180,
     marginBottom: 10,
+  },
+    dot: {
+    position: "absolute",
+    left: 5,
+    width: 60,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#F4B400",
+    bottom: 100,
   },
 
   title: {
@@ -200,17 +216,6 @@ const styles = StyleSheet.create({
     color: "#FFF",
   },
 
-  adminLogin: {
-    marginBottom: 24,
-  },
-
-  adminLoginText: {
-    fontSize: 13,
-    fontFamily: "PoppinsRegular",
-    color: "#000",
-    textDecorationLine: "underline",
-  },
-
   registerWrapper: {
     flexDirection: "row",
     alignItems: "center",
@@ -226,15 +231,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "PoppinsSemiBold",
     color: "#F4B400",
-  },
-
-  indicator: {
-    position: "absolute",
-    bottom: 90,
-    left: 40,
-    width: 60,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: "#F4B400",
   },
 });
