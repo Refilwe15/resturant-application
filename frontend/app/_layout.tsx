@@ -1,5 +1,4 @@
 // import React, { createContext, useContext, useState } from "react";
-import { Stack } from "expo-router";
 
 // /* TYPES */
 // type User = {
@@ -55,12 +54,16 @@ import { Stack } from "expo-router";
 //     </StripeProvider>
 //   );
 
+import { Stack } from "expo-router";
+import { AuthProvider } from "../context/AuthContext";
 import { CartProvider } from "../context/CartContext";
 
 export default function RootLayout() {
   return (
-    <CartProvider>
-      <Stack />
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </CartProvider>
+    </AuthProvider>
   );
 }

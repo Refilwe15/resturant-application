@@ -6,27 +6,41 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useState } from "react";
 import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
 
+// 🔥 CHANGE BASED ON ENV
+const API_URL = "http://10.0.0.113:8000/api/auth/register";
+// Android emulator ↑
+// iOS simulator → http://localhost:8000
+
 export default function RegisterScreen() {
-  // State to hold form values
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
+    if (!name || !surname || !email || !password || !confirmPassword) {
+      Alert.alert("Error", "All fields are required");
+      return;
+    }
+
     if (password !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match");
       return;
     }
 
+    setLoading(true);
+
     try {
-      const res = await fetch("http://10.0.0.113:8000/api/auth/register", {
+      const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -40,15 +54,24 @@ export default function RegisterScreen() {
       const data = await res.json();
 
       if (!res.ok) {
-        Alert.alert("Registration failed", data.error || "Unknown error");
+        Alert.alert("Registration failed", data.message || "Try again");
+        setLoading(false);
         return;
       }
 
+      // ✅ Optional: save token if backend returns it
+      if (data.token) {
+        await AsyncStorage.setItem("token", data.token);
+        await AsyncStorage.setItem("user", JSON.stringify(data.user));
+      }
+
       Alert.alert("Success", "Account created successfully!");
-      router.replace("/(tabs)"); // Navigate to main app
-    } catch (err) {
-      console.log(err);
-      Alert.alert("Error", "Unable to register. Try again.");
+      router.replace("../../(tabs)/index");
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Error", "Server unreachable");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,55 +81,48 @@ export default function RegisterScreen() {
         source={require("../../assets/images/login.png")}
         style={styles.logo}
       />
+
       <Text style={styles.title}>Create Account</Text>
       <Text style={styles.subtitle}>
         Sign up to enjoy delicious meals{"\n"}delivered to your doorstep.
       </Text>
 
-      {/* Name */}
       <View style={styles.inputWrapper}>
         <Feather name="user" size={20} color="#B8B8B8" />
         <TextInput
           placeholder="First Name"
-          placeholderTextColor="#B8B8B8"
           style={styles.input}
           value={name}
           onChangeText={setName}
         />
       </View>
 
-      {/* Surname */}
       <View style={styles.inputWrapper}>
         <Feather name="user" size={20} color="#B8B8B8" />
         <TextInput
           placeholder="Surname"
-          placeholderTextColor="#B8B8B8"
           style={styles.input}
           value={surname}
           onChangeText={setSurname}
         />
       </View>
 
-      {/* Email */}
       <View style={styles.inputWrapper}>
         <MaterialIcons name="email" size={20} color="#B8B8B8" />
         <TextInput
           placeholder="Email"
-          placeholderTextColor="#B8B8B8"
           style={styles.input}
-          keyboardType="email-address"
           autoCapitalize="none"
+          keyboardType="email-address"
           value={email}
           onChangeText={setEmail}
         />
       </View>
 
-      {/* Password */}
       <View style={styles.inputWrapper}>
         <Feather name="lock" size={20} color="#B8B8B8" />
         <TextInput
           placeholder="Password"
-          placeholderTextColor="#B8B8B8"
           secureTextEntry
           style={styles.input}
           value={password}
@@ -114,12 +130,10 @@ export default function RegisterScreen() {
         />
       </View>
 
-      {/* Confirm Password */}
       <View style={styles.inputWrapper}>
         <Feather name="lock" size={20} color="#B8B8B8" />
         <TextInput
           placeholder="Confirm Password"
-          placeholderTextColor="#B8B8B8"
           secureTextEntry
           style={styles.input}
           value={confirmPassword}
@@ -127,9 +141,16 @@ export default function RegisterScreen() {
         />
       </View>
 
-      {/* Register button */}
-      <TouchableOpacity style={styles.registerBtn} onPress={handleRegister}>
-        <Text style={styles.registerText}>Register</Text>
+      <TouchableOpacity
+        style={styles.registerBtn}
+        onPress={handleRegister}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#FFF" />
+        ) : (
+          <Text style={styles.registerText}>Register</Text>
+        )}
       </TouchableOpacity>
 
       <View style={styles.loginWrapper}>
@@ -138,8 +159,6 @@ export default function RegisterScreen() {
           <Text style={styles.loginLink}> Login</Text>
         </TouchableOpacity>
       </View>
-
-      <View style={styles.indicator} />
     </View>
   );
 }

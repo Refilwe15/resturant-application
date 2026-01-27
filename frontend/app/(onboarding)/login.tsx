@@ -6,15 +6,22 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useState } from "react";
 import { router } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
 
+// 🔥 CHANGE THIS BASED ON YOUR ENV
+const API_URL = "http://10.0.0.113:8000/api/auth/login";
+// Android emulator ↑
+// iOS simulator → http://localhost:8000
+
 export default function LoginScreen() {
-  // State to hold form values
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -22,8 +29,10 @@ export default function LoginScreen() {
       return;
     }
 
+    setLoading(true);
+
     try {
-      const res = await fetch("http://10.0.0.113:8000/api/auth/login", {
+      const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -33,18 +42,21 @@ export default function LoginScreen() {
 
       if (!res.ok) {
         Alert.alert("Login failed", data.message || "Invalid credentials");
+        setLoading(false);
         return;
       }
 
-      // Login successful
-      Alert.alert("Success", "Logged in successfully!");
-      // Optionally, save token in AsyncStorage for later API calls
-      // await AsyncStorage.setItem("token", data.token);
+      // ✅ SAVE TOKEN
+      await AsyncStorage.setItem("token", data.token);
+      await AsyncStorage.setItem("user", JSON.stringify(data.user));
 
-      router.replace("/(tabs)"); // Navigate to main app
-    } catch (err) {
-      console.log(err);
-      Alert.alert("Error", "Unable to login. Try again.");
+      // ✅ GO TO TABS
+      router.replace("/(tabs)");
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Error", "Server unreachable");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,26 +73,22 @@ export default function LoginScreen() {
         Sign in your account because good food{"\n"}deserves easy access.
       </Text>
 
-      {/* Email */}
       <View style={styles.inputWrapper}>
         <MaterialIcons name="email" size={20} color="#B8B8B8" />
         <TextInput
           placeholder="Email"
-          placeholderTextColor="#B8B8B8"
           style={styles.input}
-          keyboardType="email-address"
           autoCapitalize="none"
+          keyboardType="email-address"
           value={email}
           onChangeText={setEmail}
         />
       </View>
 
-      {/* Password */}
       <View style={styles.inputWrapper}>
         <Feather name="lock" size={20} color="#B8B8B8" />
         <TextInput
           placeholder="Password"
-          placeholderTextColor="#B8B8B8"
           secureTextEntry
           style={styles.input}
           value={password}
@@ -88,29 +96,31 @@ export default function LoginScreen() {
         />
       </View>
 
-      {/* Forgot password */}
       <TouchableOpacity style={styles.forgot}>
         <Text style={styles.forgotText}>Forgot your password?</Text>
       </TouchableOpacity>
 
-      {/* User Login */}
-      <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
-        <Text style={styles.loginText}>Login</Text>
+      <TouchableOpacity
+        style={styles.loginBtn}
+        onPress={handleLogin}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#FFF" />
+        ) : (
+          <Text style={styles.loginText}>Login</Text>
+        )}
       </TouchableOpacity>
 
-      {/* Register */}
       <View style={styles.registerWrapper}>
         <Text style={styles.registerText}>Don’t have an account?</Text>
         <TouchableOpacity onPress={() => router.push("/(onboarding)/register")}>
           <Text style={styles.registerLink}> Register Now</Text>
         </TouchableOpacity>
       </View>
-
-      <View style={styles.indicator} />
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

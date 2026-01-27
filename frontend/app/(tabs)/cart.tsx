@@ -16,22 +16,33 @@ import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { useCart } from "../../context/CartContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function CartScreen() {
-  const { cart, removeFromCart } = useCart();
+  const { cart, removeFromCart, clearCart } = useCart();
   const [address, setAddress] = useState("Fetching location...");
-
-  // Card inputs
   const [cardNumber, setCardNumber] = useState("");
   const [expMonth, setExpMonth] = useState("");
   const [expYear, setExpYear] = useState("");
   const [cvc, setCvc] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // 🔹 Load delivery address from AsyncStorage
   useEffect(() => {
-    getLocation();
+    const loadAddress = async () => {
+      const storedUser = await AsyncStorage.getItem("user");
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        if (user.address) setAddress(user.address);
+        else getLocation();
+      } else {
+        getLocation(); // fallback
+      }
+    };
+    loadAddress();
   }, []);
 
+  // 🔹 Fallback: get current location
   const getLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
@@ -53,6 +64,7 @@ export default function CartScreen() {
     }
   };
 
+  // 🔹 Render cart items
   const renderItem = ({ item }: any) => (
     <View style={styles.cartItem}>
       <Image
@@ -79,23 +91,23 @@ export default function CartScreen() {
     0,
   );
 
+  // 🔹 Handle payment + place order
   const handleCheckout = async () => {
     if (cart.length === 0) return Alert.alert("Cart is empty");
-
-    if (!cardNumber || !expMonth || !expYear || !cvc) {
+    if (!cardNumber || !expMonth || !expYear || !cvc)
       return Alert.alert("Enter complete card details");
-    }
 
     setLoading(true);
 
     try {
-      const res = await fetch(
+      // 1️⃣ Payment API
+      const paymentRes = await fetch(
         "http://10.0.0.113:8000/api/payment/create-payment-intent",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            amount: Math.round(totalAmount * 100), // amount in cents
+            amount: Math.round(totalAmount * 100),
             card: {
               number: cardNumber,
               exp_month: parseInt(expMonth),
@@ -106,20 +118,71 @@ export default function CartScreen() {
         },
       );
 
-      const data = await res.json();
-
-      if (data.success) {
-        Alert.alert(
-          "Payment Successful ✅",
-          `PaymentIntent ID: ${data.paymentIntent.id}`,
-        );
-        // Optionally clear cart or navigate
-      } else {
-        Alert.alert("Payment Failed ❌", data.message);
+      const paymentText = await paymentRes.text();
+      let paymentData;
+      try {
+        paymentData = JSON.parse(paymentText);
+      } catch {
+        console.error("Payment response is not JSON:", paymentText);
+        Alert.alert("Payment Failed ❌", "Invalid response from server");
+        setLoading(false);
+        return;
       }
+
+      if (!paymentData.success) {
+        Alert.alert("Payment Failed ❌", paymentData.message || "Try again");
+        setLoading(false);
+        return;
+      }
+
+      // 2️⃣ Payment successful -> create order
+      const token = await AsyncStorage.getItem("token");
+      const orderRes = await fetch("http://10.0.0.113:8000/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          items: cart.map((item) => ({
+            foodId: item.id,
+            quantity: item.qty,
+            selectedExtras: item.extras || [],
+            notes: item.notes || "",
+          })),
+          totalPrice: totalAmount,
+          deliveryAddress: address,
+          paymentStatus: "paid",
+        }),
+      });
+
+      const orderText = await orderRes.text();
+      let orderData;
+      try {
+        orderData = JSON.parse(orderText);
+      } catch {
+        console.error("Order response is not JSON:", orderText);
+        Alert.alert("Order Failed ❌", "Invalid response from server");
+        setLoading(false);
+        return;
+      }
+
+      if (!orderRes.ok) {
+        Alert.alert("Order Failed ❌", orderData.message || "Try again");
+        setLoading(false);
+        return;
+      }
+
+      // 3️⃣ Clear cart & show success
+      clearCart();
+      Alert.alert(
+        "Order Placed ✅",
+        `PaymentIntent ID: ${paymentData.paymentIntent.id}`,
+      );
+      router.replace("/(tabs)/menu");
     } catch (err: any) {
       console.error(err);
-      Alert.alert("Payment Error ❌", err.message);
+      Alert.alert("Error ❌", err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -140,16 +203,16 @@ export default function CartScreen() {
           <View style={{ width: 22 }} />
         </View>
 
-        {/* Location */}
+        {/* Delivery Address */}
         <View style={styles.locationBox}>
           <Feather name="truck" size={18} />
           <Text style={styles.locationText}>Delivering to {address}</Text>
-          <TouchableOpacity>
-            <Text style={styles.changeText}>Change Location</Text>
+          <TouchableOpacity onPress={getLocation}>
+            <Text style={styles.changeText}>Use Current Location</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Cart items */}
+        {/* Cart Items */}
         {cart.length === 0 ? (
           <Text style={{ textAlign: "center", marginTop: 20 }}>
             Your cart is empty

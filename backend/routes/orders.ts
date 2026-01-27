@@ -1,19 +1,8 @@
 import express, { Request, Response, Router } from "express";
 import { Order } from "../models/Order.ts";
-import { CartItem } from "../models/CartItem.ts";
-import { FoodItem } from "../models/FoodItem.ts";
 import { authMiddleware } from "../middlewares/auth.ts";
 
 const router: Router = express.Router();
-
-const calculateTotal = (
-  cart: (CartItem & { FoodItem?: FoodItem })[],
-): number => {
-  return cart.reduce((sum, item) => {
-    const price = item.FoodItem?.price || 0;
-    return sum + item.quantity * price;
-  }, 0);
-};
 
 /**
  * @swagger
@@ -22,35 +11,42 @@ const calculateTotal = (
  *     summary: Place an order
  */
 router.post("/", authMiddleware, async (req: Request, res: Response) => {
-  if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+  try {
+    // ✅ Ensure user is authenticated
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
 
-  // Each CartItem may include its associated FoodItem
-  const cart = (await CartItem.findAll({
-    where: { userId: req.user.id },
-    include: [FoodItem],
-  })) as (CartItem & { FoodItem?: FoodItem })[];
+    const { items, totalPrice, deliveryAddress, paymentStatus } = req.body;
 
-  if (!cart.length) return res.status(400).json({ message: "Cart empty" });
+    // ✅ Validate incoming data
+    if (!items || !Array.isArray(items) || items.length === 0)
+      return res.status(400).json({ message: "Cart is empty" });
 
-  const total = calculateTotal(cart);
+    if (!totalPrice || !deliveryAddress)
+      return res
+        .status(400)
+        .json({ message: "Missing totalPrice or deliveryAddress" });
 
-  const order = await Order.create({
-    userId: req.user.id,
-    items: cart.map((item) => ({
-      // Use FoodItem.id instead of item.foodId
-      foodId: item.FoodItem?.id,
-      quantity: item.quantity,
-      selectedExtras: item.selectedExtras,
-    })),
-    totalPrice: total,
-    deliveryAddress: req.body.deliveryAddress,
-    paymentStatus: "paid",
-  });
+    // ✅ Create order
+    const order = await Order.create({
+      userId: req.user.id,
+      items, // frontend sends items as [{ foodId, quantity, selectedExtras, notes }]
+      totalPrice,
+      deliveryAddress,
+      paymentStatus: paymentStatus || "pending",
+      orderStatus: "processing",
+    });
 
-  // Clear the cart
-  await CartItem.destroy({ where: { userId: req.user.id } });
-
-  res.status(201).json(order);
+    return res.status(201).json({
+      success: true,
+      message: "Order placed successfully",
+      order,
+    });
+  } catch (err: any) {
+    console.error("POST /orders error:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Server error", error: err.message });
+  }
 });
 
 /**
@@ -60,10 +56,26 @@ router.post("/", authMiddleware, async (req: Request, res: Response) => {
  *     summary: View user orders
  */
 router.get("/", authMiddleware, async (req: Request, res: Response) => {
-  if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+  try {
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
 
-  const orders = await Order.findAll({ where: { userId: req.user.id } });
-  res.json(orders);
+    // ✅ Fetch user orders
+    const orders = await Order.findAll({
+      where: { userId: req.user.id },
+      order: [["createdAt", "DESC"]],
+    });
+
+    return res.json({
+      success: true,
+      message: "Orders fetched successfully",
+      orders,
+    });
+  } catch (err: any) {
+    console.error("GET /orders error:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Server error", error: err.message });
+  }
 });
 
 export default router;

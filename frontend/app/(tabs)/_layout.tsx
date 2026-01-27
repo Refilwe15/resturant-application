@@ -1,7 +1,18 @@
-import { Tabs } from "expo-router";
+import { Tabs, Redirect } from "expo-router";
 import { Feather } from "@expo/vector-icons";
+import { useAuth } from "../../context/AuthContext";
 
 export default function TabsLayout() {
+  const { user, loading } = useAuth();
+
+  // ⏳ While restoring session
+  if (loading) return null;
+
+  // 🔒 Not logged in → go to login
+  if (!user) {
+    return <Redirect href="../../(onboarding)/login" />;
+  }
+
   return (
     <Tabs
       screenOptions={{
@@ -17,7 +28,6 @@ export default function TabsLayout() {
           paddingTop: 6,
           paddingBottom: 6,
 
-          // 👇 THIS MOVES IT UP
           position: "absolute",
           bottom: 20,
 

@@ -1,7 +1,5 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../config/db.ts";
-import { User } from "./User.ts";
-import { FoodItem } from "./FoodItem.ts";
 
 export class CartItem extends Model {
   public id!: string;
@@ -31,9 +29,3 @@ CartItem.init(
     modelName: "CartItem",
   },
 );
-
-User.hasMany(CartItem, { foreignKey: "userId" });
-CartItem.belongsTo(User, { foreignKey: "userId" });
-
-FoodItem.hasMany(CartItem, { foreignKey: "foodItemId" });
-CartItem.belongsTo(FoodItem, { foreignKey: "foodItemId" });
