@@ -10,7 +10,7 @@ import {
   Modal,
   SafeAreaView,
 } from "react-native";
-import { Feather, MaterialIcons, AntDesign } from "@expo/vector-icons";
+import { Feather, MaterialIcons, AntDesign, Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { router } from "expo-router";
 import MapView, { Marker } from "react-native-maps";
@@ -126,7 +126,7 @@ export default function HomeScreen() {
       {/* Promotional Banner */}
       <View style={styles.promoBanner}>
         <View style={styles.promoContent}>
-          <Text style={styles.promoTag}>🔥 Special Offer</Text>
+          <Text style={styles.promoTag}>Special Offer</Text>
           <Text style={styles.promoTitle}>
             Get 20% OFF{"\n"}on your first order
           </Text>
@@ -147,31 +147,32 @@ export default function HomeScreen() {
       </View>
 
       {/* Quick Actions */}
-      <View style={styles.quickActions}>
-        <TouchableOpacity
-          style={styles.actionCard}
-          onPress={() => router.push("/(tabs)/menu")}
-        >
-          <View style={styles.actionIcon}>
-            <MaterialIcons name="restaurant-menu" size={24} color="#F4B400" />
-          </View>
-          <Text style={styles.actionLabel}>Browse Menu</Text>
-        </TouchableOpacity>
+<View style={styles.quickActions}>
+  <TouchableOpacity
+    style={styles.actionCard}
+    onPress={() => router.push("/(tabs)/menu")}
+  >
+    <View style={styles.actionIcon}>
+      <Ionicons name="restaurant-outline" size={26} color="#F4B400" />
+    </View>
+    <Text style={styles.actionLabel}>Browse Menu</Text>
+  </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionCard}>
-          <View style={styles.actionIcon}>
-            <Feather name="award" size={24} color="#FF6B6B" />
-          </View>
-          <Text style={styles.actionLabel}>Rewards</Text>
-        </TouchableOpacity>
+  <TouchableOpacity style={styles.actionCard}>
+    <View style={styles.actionIcon}>
+      <Ionicons name="gift-outline" size={26} color="#FF6B6B" />
+    </View>
+    <Text style={styles.actionLabel}>Rewards</Text>
+  </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionCard}>
-          <View style={styles.actionIcon}>
-            <Feather name="heart" size={24} color="#FF6B6B" />
-          </View>
-          <Text style={styles.actionLabel}>Favorites</Text>
-        </TouchableOpacity>
-      </View>
+  <TouchableOpacity style={styles.actionCard}>
+    <View style={styles.actionIcon}>
+      <Ionicons name="heart-outline" size={26} color="#FF6B6B" />
+    </View>
+    <Text style={styles.actionLabel}>Favorites</Text>
+  </TouchableOpacity>
+</View>
+
 
       {/* Most Popular Section */}
       <View style={styles.sectionHeader}>
@@ -475,7 +476,11 @@ const styles = StyleSheet.create({
 
   promoBanner: {
     flexDirection: "row",
-    backgroundColor: "#F4B400",
+    backgroundColor: "white",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3, 
     borderRadius: 14,
     padding: 16,
     marginBottom: 24,

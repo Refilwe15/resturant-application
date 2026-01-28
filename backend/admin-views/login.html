@@ -1,22 +1,101 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Login</title>
-  <link rel="stylesheet" href="/admin/static/admin.css" />
+
+  <!-- Optional Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: "white";
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+      font-size: 28px;
+      color: #FF6B35; /* orange title */
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    input {
+      padding: 12px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      transition: 0.2s;
+    }
+
+    input:focus {
+      border-color: #FF6B35;
+      outline: none;
+      box-shadow: 0 0 5px rgba(255,107,53,0.5);
+    }
+
+    button {
+      padding: 12px;
+      background-color: #FF6B35;
+      color: #fff;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background-color: #FF4A1A;
+    }
+
+    /* Optional: small footer */
+    .container small {
+      display: block;
+      margin-top: 15px;
+      color: #888;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <h1>Admin Login</h1>
 
     <form id="loginForm">
-      <div class="input-wrapper">
-        <input type="email" placeholder="Email" required />
-      </div>
-      <div class="input-wrapper">
-        <input type="password" placeholder="Password" required />
-      </div>
-      <button>Login</button>
+      <input type="email" placeholder="Email" required />
+      <input type="password" placeholder="Password" required />
+      <button type="submit">Login</button>
     </form>
+
+    <small>Restaurant Admin Panel</small>
   </div>
 
   <script>

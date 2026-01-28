@@ -19,6 +19,7 @@ import React, { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { useCart } from "../../context/CartContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import OrderTrackingModal from "../../components/Ordertrackingmodal";
 
 export default function CartScreen() {
   const { cart, removeFromCart, clearCart } = useCart();
@@ -34,6 +35,10 @@ export default function CartScreen() {
   const [loading, setLoading] = useState(false);
   const [showCardModal, setShowCardModal] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
+  
+  // Order Tracking Modal state
+  const [showTrackingModal, setShowTrackingModal] = useState(false);
+  const [currentOrderId, setCurrentOrderId] = useState("");
 
   useEffect(() => {
     const loadAddress = async () => {
@@ -126,25 +131,32 @@ export default function CartScreen() {
         }),
       });
 
+      const orderData = await orderRes.json();
+
       if (!orderRes.ok) {
         setLoading(false);
         return Alert.alert("Order Failed", "Try again");
       }
 
+      // Extract order ID (adjust based on your API response structure)
+      const orderId = orderData._id || orderData.id || Date.now().toString();
+      
       clearCart();
-      Alert.alert(
-        "Order Placed",
-        paymentMethod === "card"
-          ? `Payment ID: ${paymentIntentId}`
-          : "Pay with cash on delivery",
-      );
+      setLoading(false);
+      
+      // Show tracking modal instead of alert
+      setCurrentOrderId(orderId);
+      setShowTrackingModal(true);
 
-      router.replace("/(tabs)/menu");
     } catch (err: any) {
       Alert.alert("Error", err.message || "Something went wrong");
-    } finally {
       setLoading(false);
     }
+  };
+
+  const handleTrackingComplete = () => {
+    setShowTrackingModal(false);
+    router.replace("/(tabs)/menu");
   };
 
   const renderItem = ({ item }: any) => (
@@ -390,6 +402,13 @@ export default function CartScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Order Tracking Modal */}
+      <OrderTrackingModal
+        visible={showTrackingModal}
+        orderId={currentOrderId}
+        onComplete={handleTrackingComplete}
+      />
     </>
   );
 }

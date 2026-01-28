@@ -2,83 +2,85 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Admin Dashboard - Orders</title>
+  <title>Admin - Orders</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
 
   <style>
-    * { box-sizing: border-box; font-family: "Poppins", sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { display: flex; min-height: 100vh; background: #f4f6f9; }
 
-    body {
-      margin: 0;
-      background: #f4f6f9;
-      display: flex;
-      height: 100vh;
-    }
-
-    /* ===== Sidebar ===== */
+    /* Sidebar */
     .sidebar {
-      width: 240px;
-      background: #111827;
+      width: 260px;
+      background-color: white;
       color: #fff;
       padding: 20px;
-    }
-
-    .logo {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 40px;
-    }
-
-    .nav a {
-      display: block;
-      color: #cbd5e1;
-      text-decoration: none;
-      padding: 12px 14px;
-      border-radius: 10px;
-      margin-bottom: 8px;
-    }
-
-    .nav a:hover,
-    .nav a.active {
-      background: #1f2937;
-      color: #fff;
-    }
-
-    /* ===== Main ===== */
-    .main {
-      flex: 1;
       display: flex;
       flex-direction: column;
     }
 
+    .logo {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 40px;
+      text-align: center;
+      color: #FF6B35;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar a {
+      color: #cbd5e1;
+      text-decoration: none;
+      padding: 14px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      transition: 0.2s;
+      font-weight: 500;
+    }
+
+    .sidebar a:hover,
+    .sidebar a.active {
+      background-color: #FF6B35;
+      color: #fff;
+    }
+
+    .logout {
+      margin-top: auto;
+      padding: 14px;
+      background-color: #EF4444;
+      text-align: center;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .logout:hover { background-color: #DC2626; }
+
+    /* Main */
+    .main {
+      flex: 1;
+      padding: 30px 40px;
+    }
+
     .header {
-      height: 70px;
-      background: #fff;
-      border-bottom: 1px solid #e5e7eb;
-      display: flex;
-      align-items: center;
-      padding: 0 30px;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1E293B;
+      margin-bottom: 25px;
     }
 
-    .header h1 {
-      font-size: 20px;
-      margin: 0;
-    }
-
-    .content {
-      padding: 30px;
-      overflow-y: auto;
-    }
-
-    /* ===== Table ===== */
+    /* Table */
     table {
       width: 100%;
       border-collapse: collapse;
       background: #fff;
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
     }
 
     th, td {
@@ -91,30 +93,30 @@
     th {
       background: #f9fafb;
       font-weight: 600;
-      color: #555;
+      color: #334155;
     }
 
-    tr:hover {
-      background: #fafafa;
-    }
+    tr:hover { background: #f1f5f9; }
 
-    /* ===== Status ===== */
+    /* Status */
     .status {
       font-weight: 600;
       text-transform: capitalize;
     }
 
-    .processing { color: orange; }
-    .preparing { color: #007bff; }
-    .on_the_way { color: purple; }
-    .delivered { color: green; }
-    .cancelled { color: red; }
+    .processing { color: #F59E0B; }
+    .preparing { color: #2563EB; }
+    .on_the_way { color: #7C3AED; }
+    .delivered { color: #16A34A; }
+    .cancelled { color: #DC2626; }
 
-    /* ===== Actions ===== */
+    /* Controls */
     select {
       padding: 8px 10px;
       border-radius: 8px;
       border: 1px solid #ddd;
+      font-size: 13px;
+      margin-right: 8px;
     }
 
     .btn {
@@ -123,17 +125,15 @@
       border: none;
       cursor: pointer;
       font-weight: 600;
+      font-size: 13px;
     }
 
     .btn-primary {
-      background: #f4b400;
-      color: #000;
-      margin-left: 8px;
+      background: #FF6B35;
+      color: #fff;
     }
 
-    .btn-primary:hover {
-      opacity: 0.9;
-    }
+    .btn-primary:hover { opacity: 0.9; }
   </style>
 </head>
 
@@ -141,34 +141,30 @@
 
   <!-- Sidebar -->
   <div class="sidebar">
-    <div class="logo">🍔 Admin</div>
-    <div class="nav">
-      <a href="/admin/dashboard">Dashboard</a>
-      <a href="/admin/foods">Foods</a>
-      <a href="/admin/orders" class="active">Orders</a>
-    </div>
+    <div class="logo">Admin Panel</div>
+    <a href="/admin/dashboard">Dashboard</a>
+    <a href="/admin/foods">Manage Foods</a>
+    <a href="/admin/orders" class="active">View Orders</a>
+    <a href="/admin/foods/add">Add Food</a>
+    <div class="logout" onclick="logout()">Logout</div>
   </div>
 
   <!-- Main -->
   <div class="main">
-    <div class="header">
-      <h1>Orders</h1>
-    </div>
+    <div class="header">Orders</div>
 
-    <div class="content">
-      <table>
-        <thead>
-          <tr>
-            <th>Order ID</th>
-            <th>Total</th>
-            <th>Address</th>
-            <th>Status</th>
-            <th>Change Status</th>
-          </tr>
-        </thead>
-        <tbody id="ordersTableBody"></tbody>
-      </table>
-    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Total</th>
+          <th>Address</th>
+          <th>Status</th>
+          <th>Update Status</th>
+        </tr>
+      </thead>
+      <tbody id="ordersTableBody"></tbody>
+    </table>
   </div>
 
 <script>
@@ -176,46 +172,44 @@
   const tableBody = document.getElementById("ordersTableBody");
 
   fetch("/api/orders", {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
+    headers: { Authorization: `Bearer ${token}` }
   })
-    .then(res => res.json())
-    .then(data => {
-      tableBody.innerHTML = "";
+  .then(res => res.json())
+  .then(data => {
+    tableBody.innerHTML = "";
 
-      data.orders.forEach(order => {
-        tableBody.innerHTML += `
-          <tr>
-            <td>${order.id}</td>
-            <td>R${order.totalPrice}</td>
-            <td>${order.deliveryAddress}</td>
-            <td>
-              <span class="status ${order.orderStatus}">
-                ${order.orderStatus.replaceAll("_", " ")}
-              </span>
-            </td>
-            <td>
-              <select id="status-${order.id}">
-                <option value="processing">processing</option>
-                <option value="preparing">preparing</option>
-                <option value="on_the_way">on the way</option>
-                <option value="delivered">delivered</option>
-                <option value="cancelled">cancelled</option>
-              </select>
+    data.orders.forEach(order => {
+      tableBody.innerHTML += `
+        <tr>
+          <td>${order.id}</td>
+          <td>R${order.totalPrice}</td>
+          <td>${order.deliveryAddress}</td>
+          <td>
+            <span class="status ${order.orderStatus}">
+              ${order.orderStatus.replaceAll("_", " ")}
+            </span>
+          </td>
+          <td>
+            <select id="status-${order.id}">
+              <option value="processing">processing</option>
+              <option value="preparing">preparing</option>
+              <option value="on_the_way">on the way</option>
+              <option value="delivered">delivered</option>
+              <option value="cancelled">cancelled</option>
+            </select>
 
-              <button class="btn btn-primary"
-                onclick="updateStatus('${order.id}')">
-                Update
-              </button>
-            </td>
-          </tr>
-        `;
+            <button class="btn btn-primary"
+              onclick="updateStatus('${order.id}')">
+              Update
+            </button>
+          </td>
+        </tr>
+      `;
 
-        document.getElementById(`status-${order.id}`).value =
-          order.orderStatus;
-      });
+      document.getElementById(`status-${order.id}`).value =
+        order.orderStatus;
     });
+  });
 
   async function updateStatus(orderId) {
     const newStatus =
@@ -231,11 +225,15 @@
     });
 
     if (res.ok) {
-      alert("Order status updated");
       location.reload();
     } else {
       alert("Failed to update status");
     }
+  }
+
+  function logout() {
+    localStorage.removeItem("adminToken");
+    location.href = "/admin";
   }
 </script>
 

@@ -1,6 +1,3 @@
-
-
-/*
 import { Sequelize } from "sequelize";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -9,10 +6,10 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Initialize Sequelize for SQLite
+// Initialize Sequelize (SQLite)
 export const sequelize = new Sequelize({
   dialect: "sqlite",
-  storage: path.join(__dirname, "../database.sqlite"), // Local DB file
+  storage: path.join(__dirname, "../database.sqlite"),
   logging: false,
 });
 
@@ -25,5 +22,3 @@ export const testConnection = async () => {
     console.error("❌ Unable to connect to SQLite:", error);
   }
 };
-
-*/
