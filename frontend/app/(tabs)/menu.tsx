@@ -49,7 +49,7 @@ export default function MenuScreen() {
   useEffect(() => {
     const fetchFoods = async () => {
       try {
-        const res = await fetch("http://10.196.0.142:8000/api/foods");
+        const res = await fetch("https://restu-back.onrender.com/api/foods");
         const data = await res.json();
 
         const categorized: Record<string, any[]> = {
@@ -134,7 +134,7 @@ export default function MenuScreen() {
   const renderItem = ({ item }: any) => (
     <View style={styles.card}>
       <Image
-        source={{ uri: `http://10.196.0.142:8000${item.image}` }}
+        source={{ uri: `https://restu-back.onrender.com${item.image}` }}
         style={styles.image}
       />
       <Text style={styles.name}>{item.name}</Text>
@@ -323,7 +323,7 @@ export default function MenuScreen() {
 
                 {/* Image */}
                 <Image
-                  source={{ uri: `http://10.196.0.142:8000/${selectedItem.image}` }}
+                  source={{ uri: `https://restu-back.onrender.com/${selectedItem.image}` }}
                   style={styles.modalImage}
                 />
 

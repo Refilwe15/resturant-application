@@ -27,14 +27,13 @@ export default function CartScreen() {
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("cash");
 
   const [cardNumber, setCardNumber] = useState("");
-  const [expMonth, setExpMonth] = useState("");
-  const [expYear, setExpYear] = useState("");
-  const [cvc, setCvc] = useState("");
+  const [expMonth, setExpMonth] = useState("12"); // pre-filled
+  const [expYear, setExpYear] = useState("2025"); // pre-filled
+  const [cvc, setCvc] = useState("123"); // pre-filled
 
   const [loading, setLoading] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [showLocationModal, setShowLocationModal] = useState(false);
   const [showCardModal, setShowCardModal] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
 
   useEffect(() => {
     const loadAddress = async () => {
@@ -60,25 +59,17 @@ export default function CartScreen() {
 
     if (geo.length > 0) {
       const place = geo[0];
-      setAddress(
-        `${place.street || ""} ${place.name || ""}, ${place.city || ""}`,
-      );
+      setAddress(`${place.street || ""} ${place.name || ""}, ${place.city || ""}`);
     }
   };
 
-  const totalAmount = cart.reduce(
-    (sum, item) => sum + item.price * item.qty,
-    0,
-  );
+  const totalAmount = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
 
   const handleCheckout = async () => {
     if (cart.length === 0) return Alert.alert("Cart is empty");
 
-    if (
-      paymentMethod === "card" &&
-      (!cardNumber || !expMonth || !expYear || !cvc)
-    ) {
-      return Alert.alert("Enter complete card details");
+    if (paymentMethod === "card" && !cardNumber) {
+      return Alert.alert("Enter card number");
     }
 
     setLoading(true);
@@ -88,7 +79,7 @@ export default function CartScreen() {
 
       if (paymentMethod === "card") {
         const paymentRes = await fetch(
-          "http://10.196.0.142:8000/api/payment/create-payment-intent",
+          "https://restu-back.onrender.com/api/payment/create-payment-intent",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -116,7 +107,7 @@ export default function CartScreen() {
 
       const token = await AsyncStorage.getItem("token");
 
-      const orderRes = await fetch("http://10.196.0.142:8000/api/orders", {
+      const orderRes = await fetch("https://restu-back.onrender.com/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -159,7 +150,7 @@ export default function CartScreen() {
   const renderItem = ({ item }: any) => (
     <View style={styles.cartItem}>
       <Image
-        source={{ uri: `http://10.196.0.142:8000${item.image}` }}
+        source={{ uri: `https://restu-back.onrender.com${item.image}` }}
         style={styles.cartImage}
       />
       <View style={{ flex: 1, marginLeft: 12 }}>
@@ -172,10 +163,7 @@ export default function CartScreen() {
         )}
         <Text style={styles.cartPrice}>R{(item.price * item.qty).toFixed(2)}</Text>
       </View>
-      <TouchableOpacity
-        onPress={() => removeFromCart(item.id)}
-        style={styles.deleteBtn}
-      >
+      <TouchableOpacity onPress={() => removeFromCart(item.id)} style={styles.deleteBtn}>
         <Feather name="trash-2" size={18} color="#FF6B6B" />
       </TouchableOpacity>
     </View>
@@ -202,7 +190,6 @@ export default function CartScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView contentContainerStyle={styles.container}>
-          {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={() => router.back()}>
               <Feather name="arrow-left" size={22} color="#000" />
@@ -215,7 +202,6 @@ export default function CartScreen() {
             <EmptyCart />
           ) : (
             <>
-              {/* Delivery Address */}
               <TouchableOpacity
                 style={styles.locationBox}
                 onPress={() => setShowLocationModal(true)}
@@ -232,7 +218,6 @@ export default function CartScreen() {
                 <Feather name="chevron-right" size={20} color="#999" />
               </TouchableOpacity>
 
-              {/* Cart Items */}
               <View style={styles.cartSection}>
                 <Text style={styles.sectionTitle}>Order Items</Text>
                 <FlatList
@@ -243,13 +228,10 @@ export default function CartScreen() {
                 />
               </View>
 
-              {/* Order Summary */}
               <View style={styles.summaryBox}>
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryLabel}>Subtotal</Text>
-                  <Text style={styles.summaryValue}>
-                    R{totalAmount.toFixed(2)}
-                  </Text>
+                  <Text style={styles.summaryValue}>R{totalAmount.toFixed(2)}</Text>
                 </View>
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryLabel}>Delivery Fee</Text>
@@ -258,20 +240,16 @@ export default function CartScreen() {
                 <View style={styles.divider} />
                 <View style={styles.summaryRow}>
                   <Text style={styles.totalLabel}>Total</Text>
-                  <Text style={styles.totalValue}>
-                    R{(totalAmount + 25).toFixed(2)}
-                  </Text>
+                  <Text style={styles.totalValue}>R{(totalAmount + 25).toFixed(2)}</Text>
                 </View>
               </View>
 
               {/* Payment Method */}
               <View style={styles.paymentSection}>
                 <Text style={styles.sectionTitle}>Payment Method</Text>
+
                 <TouchableOpacity
-                  style={[
-                    styles.paymentOption,
-                    paymentMethod === "cash" && styles.selectedPayment,
-                  ]}
+                  style={[styles.paymentOption, paymentMethod === "cash" && styles.selectedPayment]}
                   onPress={() => setPaymentMethod("cash")}
                 >
                   <View style={styles.radioButton}>
@@ -285,11 +263,11 @@ export default function CartScreen() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[
-                    styles.paymentOption,
-                    paymentMethod === "card" && styles.selectedPayment,
-                  ]}
-                  onPress={() => setPaymentMethod("card")}
+                  style={[styles.paymentOption, paymentMethod === "card" && styles.selectedPayment]}
+                  onPress={() => {
+                    setPaymentMethod("card");
+                    setShowCardModal(true); // open modal when card selected
+                  }}
                 >
                   <View style={styles.radioButton}>
                     {paymentMethod === "card" && <View style={styles.radioDot} />}
@@ -299,29 +277,9 @@ export default function CartScreen() {
                     <Text style={styles.paymentText}>Debit/Credit Card</Text>
                     <Text style={styles.paymentSubtext}>Secure payment</Text>
                   </View>
-                  <TouchableOpacity
-                    onPress={() => setShowCardModal(true)}
-                    style={styles.editCardBtn}
-                  >
-                    <Feather name="edit-2" size={16} color="#F4B400" />
-                  </TouchableOpacity>
                 </TouchableOpacity>
-
-                {/* Card Info Display when selected */}
-                {paymentMethod === "card" && cardNumber && (
-                  <View style={styles.cardInfoBox}>
-                    <Feather name="check-circle" size={20} color="#4CAF50" />
-                    <View style={{ marginLeft: 12, flex: 1 }}>
-                      <Text style={styles.cardInfoLabel}>Card Details Saved</Text>
-                      <Text style={styles.cardInfoNumber}>
-                        •••• •••• •••• {cardNumber.slice(-4)}
-                      </Text>
-                    </View>
-                  </View>
-                )}
               </View>
 
-              {/* Checkout Button */}
               <TouchableOpacity
                 style={[styles.checkoutBtn, loading && styles.checkoutBtnDisabled]}
                 onPress={handleCheckout}
@@ -332,24 +290,17 @@ export default function CartScreen() {
                 ) : (
                   <>
                     <Text style={styles.checkoutText}>Place Order</Text>
-                    <Text style={styles.checkoutAmount}>
-                      R{(totalAmount + 25).toFixed(2)}
-                    </Text>
+                    <Text style={styles.checkoutAmount}>R{(totalAmount + 25).toFixed(2)}</Text>
                   </>
                 )}
               </TouchableOpacity>
 
-              {/* Clear Cart Option */}
               <TouchableOpacity
                 style={styles.clearBtn}
                 onPress={() => {
                   Alert.alert("Clear Cart?", "Remove all items?", [
                     { text: "Cancel", style: "cancel" },
-                    {
-                      text: "Clear",
-                      style: "destructive",
-                      onPress: () => clearCart(),
-                    },
+                    { text: "Clear", style: "destructive", onPress: () => clearCart() },
                   ]);
                 }}
               >
@@ -360,13 +311,8 @@ export default function CartScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Card Details Modal */}
-      <Modal
-        visible={showCardModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowCardModal(false)}
-      >
+      {/* Card Modal */}
+      <Modal visible={showCardModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
@@ -376,176 +322,48 @@ export default function CartScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Card Preview */}
-            <View style={styles.cardPreview}>
-              <View style={styles.cardGradient}>
-                <View style={styles.cardPreviewContent}>
-                  <Text style={styles.cardChip}>•••• •••• •••• {cardNumber.slice(-4) || "••••"}</Text>
-                  <View style={styles.cardFooter}>
-                    <View>
-                      <Text style={styles.cardExpLabel}>Valid Thru</Text>
-                      <Text style={styles.cardExpValue}>
-                        {expMonth || "MM"}/{expYear || "YY"}
-                      </Text>
-                    </View>
-                    <Feather name="credit-card" size={32} color="#FFF" />
-                  </View>
-                </View>
-              </View>
-            </View>
+            <TextInput
+              placeholder="Card Number"
+              keyboardType="numeric"
+              value={cardNumber}
+              onChangeText={setCardNumber}
+              style={styles.modalInput}
+              maxLength={16}
+            />
 
-            {/* Card Number Input */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Card Number</Text>
+            <View style={{ flexDirection: "row", gap: 12 }}>
               <TextInput
-                placeholder="1234 5678 9012 3456"
-                keyboardType="numeric"
-                value={cardNumber}
-                onChangeText={setCardNumber}
-                style={styles.modalInput}
-                maxLength={16}
+                placeholder="MM"
+                value={expMonth}
+                style={[styles.modalInput, { flex: 1 }]}
+                editable={false}
+              />
+              <TextInput
+                placeholder="YY"
+                value={expYear}
+                style={[styles.modalInput, { flex: 1 }]}
+                editable={false}
+              />
+              <TextInput
+                placeholder="CVC"
+                value={cvc}
+                style={[styles.modalInput, { flex: 1 }]}
+                editable={false}
               />
             </View>
 
-            {/* Expiry and CVC */}
-            <View style={{ flexDirection: "row", gap: 12 }}>
-              <View style={[styles.inputGroup, { flex: 1 }]}>
-                <Text style={styles.inputLabel}>Expires</Text>
-                <View style={{ flexDirection: "row", gap: 8 }}>
-                  <TextInput
-                    placeholder="MM"
-                    keyboardType="numeric"
-                    value={expMonth}
-                    onChangeText={setExpMonth}
-                    style={[styles.modalInput, { flex: 1 }]}
-                    maxLength={2}
-                  />
-                  <TextInput
-                    placeholder="YY"
-                    keyboardType="numeric"
-                    value={expYear}
-                    onChangeText={setExpYear}
-                    style={[styles.modalInput, { flex: 1 }]}
-                    maxLength={2}
-                  />
-                </View>
-              </View>
-              <View style={[styles.inputGroup, { flex: 0.8 }]}>
-                <Text style={styles.inputLabel}>CVV</Text>
-                <TextInput
-                  placeholder="123"
-                  keyboardType="numeric"
-                  value={cvc}
-                  onChangeText={setCvc}
-                  style={styles.modalInput}
-                  maxLength={3}
-                  secureTextEntry
-                />
-              </View>
-            </View>
-
-            {/* Security Notice */}
-            <View style={styles.securityNotice}>
-              <Feather name="lock" size={16} color="#4CAF50" />
-              <Text style={styles.securityText}>Your card details are encrypted and secure</Text>
-            </View>
-
-            {/* Save Button */}
-            <TouchableOpacity
-              style={[
-                styles.modalConfirmBtn,
-                (!cardNumber || !expMonth || !expYear || !cvc) && styles.modalConfirmBtnDisabled,
-              ]}
-              onPress={() => {
-                if (!cardNumber || !expMonth || !expYear || !cvc) {
-                  Alert.alert("Error", "Please fill all card details");
-                  return;
-                }
-                setShowCardModal(false);
-              }}
-              disabled={!cardNumber || !expMonth || !expYear || !cvc}
-            >
-              <Text style={styles.modalConfirmText}>Save Card Details</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Payment Modal */}
-      <Modal
-        visible={showPaymentModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowPaymentModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Payment Details</Text>
-              <TouchableOpacity onPress={() => setShowPaymentModal(false)}>
-                <Feather name="x" size={24} />
-              </TouchableOpacity>
-            </View>
-
-            {paymentMethod === "card" && (
-              <>
-                <TextInput
-                  placeholder="Card Number"
-                  keyboardType="numeric"
-                  value={cardNumber}
-                  onChangeText={setCardNumber}
-                  style={styles.modalInput}
-                  maxLength={16}
-                />
-                <View style={{ flexDirection: "row", gap: 12 }}>
-                  <TextInput
-                    placeholder="MM"
-                    keyboardType="numeric"
-                    value={expMonth}
-                    onChangeText={setExpMonth}
-                    style={[styles.modalInput, { flex: 1 }]}
-                    maxLength={2}
-                  />
-                  <TextInput
-                    placeholder="YY"
-                    keyboardType="numeric"
-                    value={expYear}
-                    onChangeText={setExpYear}
-                    style={[styles.modalInput, { flex: 1 }]}
-                    maxLength={2}
-                  />
-                  <TextInput
-                    placeholder="CVC"
-                    keyboardType="numeric"
-                    value={cvc}
-                    onChangeText={setCvc}
-                    style={[styles.modalInput, { flex: 1 }]}
-                    maxLength={3}
-                  />
-                </View>
-              </>
-            )}
-
             <TouchableOpacity
               style={styles.modalConfirmBtn}
-              onPress={() => {
-                setShowPaymentModal(false);
-                handleCheckout();
-              }}
+              onPress={() => setShowCardModal(false)}
             >
-              <Text style={styles.modalConfirmText}>Confirm & Checkout</Text>
+              <Text style={styles.modalConfirmText}>Save Card</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
       {/* Location Modal */}
-      <Modal
-        visible={showLocationModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowLocationModal(false)}
-      >
+      <Modal visible={showLocationModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
@@ -577,447 +395,52 @@ export default function CartScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 30,
-  },
-
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-    marginTop: 10,
-  },
-
-  title: {
-    fontSize: 24,
-    fontWeight: "800",
-    color: "#000",
-  },
-
-  /* Empty Cart */
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 100,
-  },
-
-  emptyText: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#333",
-    marginTop: 16,
-  },
-
-  emptySubtext: {
-    fontSize: 14,
-    color: "#999",
-    marginTop: 8,
-  },
-
-  continueShopping: {
-    backgroundColor: "#F4B400",
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 20,
-    marginTop: 24,
-  },
-
-  continueText: {
-    color: "#FFF",
-    fontWeight: "700",
-    fontSize: 14,
-  },
-
-  /* Location */
-  locationBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 14,
-    backgroundColor: "#FFF7E0",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#F4B400",
-    marginBottom: 20,
-  },
-
-  locationIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 50,
-    backgroundColor: "#FFF",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-
-  locationLabel: {
-    fontSize: 12,
-    color: "#999",
-    fontWeight: "600",
-  },
-
-  locationText: {
-    fontSize: 13,
-    color: "#333",
-    fontWeight: "600",
-    marginTop: 2,
-  },
-
-  /* Cart Section */
-  cartSection: {
-    marginBottom: 20,
-  },
-
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#000",
-    marginBottom: 12,
-  },
-
-  cartItem: {
-    flexDirection: "row",
-    marginBottom: 12,
-    backgroundColor: "#F9F9F9",
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#EFEFEF",
-  },
-
-  cartImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 10,
-  },
-
-  cartName: {
-    fontWeight: "700",
-    fontSize: 14,
-    color: "#000",
-  },
-
-  cartQty: {
-    fontSize: 12,
-    color: "#666",
-    marginTop: 4,
-  },
-
-  cartExtras: {
-    fontSize: 11,
-    color: "#999",
-    marginTop: 2,
-    fontStyle: "italic",
-  },
-
-  cartPrice: {
-    fontWeight: "700",
-    fontSize: 14,
-    color: "#F4B400",
-    marginTop: 6,
-  },
-
-  deleteBtn: {
-    padding: 8,
-    justifyContent: "center",
-  },
-
-  /* Summary */
-  summaryBox: {
-    backgroundColor: "#F9F9F9",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: "#EFEFEF",
-  },
-
-  summaryRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-
-  summaryLabel: {
-    fontSize: 13,
-    color: "#666",
-    fontWeight: "600",
-  },
-
-  summaryValue: {
-    fontSize: 13,
-    color: "#333",
-    fontWeight: "600",
-  },
-
-  divider: {
-    height: 1,
-    backgroundColor: "#EFEFEF",
-    marginVertical: 12,
-  },
-
-  totalLabel: {
-    fontSize: 15,
-    color: "#000",
-    fontWeight: "800",
-  },
-
-  totalValue: {
-    fontSize: 15,
-    color: "#F4B400",
-    fontWeight: "800",
-  },
-
-  /* Payment Section */
-  paymentSection: {
-    marginBottom: 20,
-  },
-
-  paymentOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 14,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: "#EFEFEF",
-    marginBottom: 10,
-    backgroundColor: "#FFF",
-  },
-
-  selectedPayment: {
-    borderColor: "#F4B400",
-    backgroundColor: "#FFF7E0",
-  },
-
-  radioButton: {
-    width: 20,
-    height: 20,
-    borderRadius: 50,
-    borderWidth: 2,
-    borderColor: "#DDD",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-
-  radioDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 50,
-    backgroundColor: "#F4B400",
-  },
-
-  paymentText: {
-    fontWeight: "700",
-    fontSize: 14,
-    color: "#000",
-  },
-
-  paymentSubtext: {
-    fontSize: 12,
-    color: "#999",
-    marginTop: 2,
-  },
-
-  /* Checkout Button */
-  checkoutBtn: {
-    backgroundColor: "#D9A441",
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 12,
-  },
-
-  checkoutBtnDisabled: {
-    opacity: 0.6,
-  },
-
-  checkoutText: {
-    color: "#FFF",
-    fontWeight: "800",
-    fontSize: 16,
-  },
-
-  checkoutAmount: {
-    color: "#FFF",
-    fontWeight: "600",
-    fontSize: 12,
-    marginTop: 4,
-  },
-
-  clearBtn: {
-    paddingVertical: 12,
-    borderRadius: 12,
-    alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: "#FF6B6B",
-  },
-
-  clearText: {
-    color: "#FF6B6B",
-    fontWeight: "700",
-    fontSize: 14,
-  },
-
-  /* Modal */
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
-  },
-
-  modalContent: {
-    backgroundColor: "#FFF",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    paddingBottom: 30,
-  },
-
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#000",
-  },
-
-  modalInput: {
-    borderWidth: 1.5,
-    borderColor: "#EFEFEF",
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 12,
-    fontSize: 14,
-    color: "#333",
-  },
-
-  modalConfirmBtn: {
-    backgroundColor: "#F4B400",
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    marginTop: 12,
-  },
-
-  modalConfirmBtnDisabled: {
-    opacity: 0.5,
-  },
-
-  modalConfirmText: {
-    color: "#FFF",
-    fontWeight: "800",
-    fontSize: 16,
-  },
-
-  /* Card Details Modal Styles */
-  cardPreview: {
-    marginBottom: 24,
-    borderRadius: 16,
-    overflow: "hidden",
-  },
-
-  cardGradient: {
-    padding: 20,
-    minHeight: 200,
-    justifyContent: "space-between",
-    backgroundColor: "#F4B400",
-    borderRadius: 12,
-  },
-
-  cardPreviewContent: {
-    flex: 1,
-    justifyContent: "space-between",
-  },
-
-  cardChip: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#FFF",
-    letterSpacing: 2,
-  },
-
-  cardFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
-  },
-
-  cardExpLabel: {
-    fontSize: 10,
-    color: "rgba(255,255,255,0.7)",
-    fontWeight: "600",
-  },
-
-  cardExpValue: {
-    fontSize: 16,
-    color: "#FFF",
-    fontWeight: "700",
-    marginTop: 4,
-  },
-
-  inputGroup: {
-    marginBottom: 16,
-  },
-
-  inputLabel: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#333",
-    marginBottom: 8,
-  },
-
-  editCardBtn: {
-    padding: 8,
-  },
-
-  cardInfoBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#E8F5E9",
-    padding: 12,
-    borderRadius: 10,
-    marginTop: 10,
-    borderWidth: 1,
-    borderColor: "#4CAF50",
-  },
-
-  cardInfoLabel: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#2E7D32",
-  },
-
-  cardInfoNumber: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#1B5E20",
-    marginTop: 2,
-  },
-
-  securityNotice: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#E8F5E9",
-    padding: 12,
-    borderRadius: 10,
-    marginVertical: 16,
-  },
-
-  securityText: {
-    fontSize: 12,
-    color: "#2E7D32",
-    fontWeight: "600",
-    marginLeft: 10,
-    flex: 1,
-  },
+  container: { paddingHorizontal: 16, paddingTop: 20, paddingBottom: 30 },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 24, marginTop: 10 },
+  title: { fontSize: 24, fontWeight: "800", color: "#000" },
+  emptyContainer: { alignItems: "center", justifyContent: "center", paddingVertical: 100 },
+  emptyText: { fontSize: 18, fontWeight: "700", color: "#333", marginTop: 16 },
+  emptySubtext: { fontSize: 14, color: "#999", marginTop: 8 },
+  continueShopping: { backgroundColor: "#F4B400", paddingVertical: 12, paddingHorizontal: 32, borderRadius: 20, marginTop: 24 },
+  continueText: { color: "#FFF", fontWeight: "700", fontSize: 14 },
+  locationBox: { flexDirection: "row", alignItems: "center", padding: 14, backgroundColor: "#FFF7E0", borderRadius: 12, borderWidth: 1, borderColor: "#F4B400", marginBottom: 20 },
+  locationIcon: { width: 36, height: 36, borderRadius: 50, backgroundColor: "#FFF", justifyContent: "center", alignItems: "center", marginRight: 12 },
+  locationLabel: { fontSize: 12, color: "#999", fontWeight: "600" },
+  locationText: { fontSize: 13, color: "#333", fontWeight: "600", marginTop: 2 },
+  cartSection: { marginBottom: 20 },
+  sectionTitle: { fontSize: 16, fontWeight: "800", color: "#000", marginBottom: 12 },
+  cartItem: { flexDirection: "row", marginBottom: 12, backgroundColor: "#F9F9F9", padding: 12, borderRadius: 12, borderWidth: 1, borderColor: "#EFEFEF" },
+  cartImage: { width: 80, height: 80, borderRadius: 10 },
+  cartName: { fontWeight: "700", fontSize: 14, color: "#000" },
+  cartQty: { fontSize: 12, color: "#666", marginTop: 4 },
+  cartExtras: { fontSize: 11, color: "#999", marginTop: 2, fontStyle: "italic" },
+  cartPrice: { fontWeight: "700", fontSize: 14, color: "#F4B400", marginTop: 6 },
+  deleteBtn: { padding: 8, justifyContent: "center" },
+  summaryBox: { backgroundColor: "#F9F9F9", padding: 16, borderRadius: 12, marginBottom: 20, borderWidth: 1, borderColor: "#EFEFEF" },
+  summaryRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
+  summaryLabel: { fontSize: 13, color: "#666", fontWeight: "600" },
+  summaryValue: { fontSize: 13, color: "#333", fontWeight: "600" },
+  divider: { height: 1, backgroundColor: "#EFEFEF", marginVertical: 12 },
+  totalLabel: { fontSize: 15, color: "#000", fontWeight: "800" },
+  totalValue: { fontSize: 15, color: "#F4B400", fontWeight: "800" },
+  paymentSection: { marginBottom: 20 },
+  paymentOption: { flexDirection: "row", alignItems: "center", padding: 14, borderRadius: 12, borderWidth: 1.5, borderColor: "#EFEFEF", marginBottom: 10, backgroundColor: "#FFF" },
+  selectedPayment: { borderColor: "#F4B400", backgroundColor: "#FFF7E0" },
+  radioButton: { width: 20, height: 20, borderRadius: 50, borderWidth: 2, borderColor: "#DDD", justifyContent: "center", alignItems: "center", marginRight: 12 },
+  radioDot: { width: 10, height: 10, borderRadius: 50, backgroundColor: "#F4B400" },
+  paymentText: { fontWeight: "700", fontSize: 14, color: "#000" },
+  paymentSubtext: { fontSize: 12, color: "#999", marginTop: 2 },
+  checkoutBtn: { backgroundColor: "#F4B400", paddingVertical: 16, borderRadius: 12, flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 20, alignItems: "center", marginBottom: 12 },
+  checkoutBtnDisabled: { opacity: 0.6 },
+  checkoutText: { color: "#FFF", fontWeight: "700", fontSize: 16 },
+  checkoutAmount: { color: "#FFF", fontWeight: "700", fontSize: 16 },
+  clearBtn: { alignItems: "center", padding: 12 },
+  clearText: { color: "#FF6B6B", fontWeight: "700" },
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "flex-end" },
+  modalContent: { backgroundColor: "#FFF", padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
+  modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
+  modalTitle: { fontWeight: "800", fontSize: 18 },
+  modalInput: { borderWidth: 1, borderColor: "#DDD", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 12 },
+  modalConfirmBtn: { backgroundColor: "#F4B400", paddingVertical: 14, borderRadius: 12, alignItems: "center" },
+  modalConfirmText: { color: "#FFF", fontWeight: "700", fontSize: 16 },
 });

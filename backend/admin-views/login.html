@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+  <title>Admin Login</title>
+  <link rel="stylesheet" href="/admin/static/admin.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Admin Login</h1>
+
+    <form id="loginForm">
+      <div class="input-wrapper">
+        <input type="email" placeholder="Email" required />
+      </div>
+      <div class="input-wrapper">
+        <input type="password" placeholder="Password" required />
+      </div>
+      <button>Login</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById("loginForm").onsubmit = async (e) => {
+      e.preventDefault();
+
+      const [email, password] = e.target.querySelectorAll("input");
+
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.value,
+          password: password.value
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.token) {
+        localStorage.setItem("adminToken", data.token);
+        location.href = "/admin/dashboard";
+      } else {
+        alert("Not authorized");
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard - Foods</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    * { box-sizing: border-box; font-family: "Poppins", sans-serif; }
+
+    body {
+      margin: 0;
+      background: #f4f6f9;
+      display: flex;
+      height: 100vh;
+    }
+
+    /* ===== Sidebar ===== */
+    .sidebar {
+      width: 240px;
+      background: #111827;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 40px;
+    }
+
+    .nav a {
+      color: #cbd5e1;
+      text-decoration: none;
+      padding: 12px 14px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      display: block;
+      transition: 0.2s;
+    }
+
+    .nav a:hover, .nav a.active {
+      background: #1f2937;
+      color: #fff;
+    }
+
+    /* ===== Main ===== */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      height: 70px;
+      background: #fff;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+
+    .content {
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    /* ===== Actions ===== */
+    .top-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background: #f4b400;
+      color: #000;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111;
+    }
+
+    /* ===== Table ===== */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    th, td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f9fafb;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background: #fafafa;
+    }
+
+    img.food-img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* ===== Modal ===== */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: #fff;
+      width: 500px;
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .modal h3 {
+      margin-top: 0;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .form-grid input,
+    .form-grid select {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo">🍔 Admin</div>
+    <div class="nav">
+      <a href="/admin/dashboard">Dashboard</a>
+      <a href="/admin/foods" class="active">Foods</a>
+      <a href="/admin/orders">Orders</a>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="header">
+      <h1>Food Management</h1>
+      <button class="btn btn-primary" onclick="openModal()">+ Add Food</button>
+    </div>
+
+    <div class="content">
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Price</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="foodTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="foodModal">
+    <div class="modal-content">
+      <h3 id="modalTitle">Add Food</h3>
+
+      <form id="foodForm" enctype="multipart/form-data">
+        <input type="hidden" id="foodId"/>
+
+        <div class="form-grid">
+          <input name="name" placeholder="Name" required />
+          <input name="price" type="number" placeholder="Price" required />
+          <input name="description" placeholder="Description" />
+          <select name="type">
+            <option value="Burgers">Burgers</option>
+            <option value="Sides">Sides</option>
+            <option value="Desserts">Desserts</option>
+            <option value="Drinks">Drinks</option>
+          </select>
+          <input name="image" type="file" />
+          <input name="extras" placeholder='Extras JSON' />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-primary" id="saveBtn">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<script>
+  const API = "/api/foods";
+  const token = localStorage.getItem("adminToken");
+
+  const table = document.getElementById("foodTable");
+  const modal = document.getElementById("foodModal");
+  const form = document.getElementById("foodForm");
+  const modalTitle = document.getElementById("modalTitle");
+  const foodIdInput = document.getElementById("foodId");
+
+  let editing = false;
+
+  function openModal() {
+    modal.style.display = "flex";
+  }
+
+  function closeModal() {
+    modal.style.display = "none";
+    form.reset();
+    editing = false;
+    foodIdInput.value = "";
+    modalTitle.innerText = "Add Food";
+  }
+
+  async function loadFoods() {
+    const res = await fetch(API);
+    const foods = await res.json();
+
+    table.innerHTML = "";
+    foods.forEach(food => {
+      table.innerHTML += `
+        <tr>
+          <td>${food.image ? `<img src="${food.image}" class="food-img"/>` : "-"}</td>
+          <td>${food.name}</td>
+          <td>${food.type}</td>
+          <td>R${food.price}</td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-secondary" onclick='editFood(${JSON.stringify(food)})'>Edit</button>
+              <button class="btn btn-danger" onclick="deleteFood('${food.id}')">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  function editFood(food) {
+    editing = true;
+    openModal();
+    modalTitle.innerText = "Edit Food";
+
+    foodIdInput.value = food.id;
+    form.name.value = food.name;
+    form.price.value = food.price;
+    form.description.value = food.description;
+    form.type.value = food.type;
+    form.extras.value = JSON.stringify(food.extras || []);
+  }
+
+  async function deleteFood(id) {
+    if (!confirm("Delete this food?")) return;
+
+    await fetch(`${API}/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    loadFoods();
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    const id = foodIdInput.value;
+
+    const url = editing ? `${API}/${id}` : API;
+    const method = editing ? "PUT" : "POST";
+
+    await fetch(url, {
+      method,
+      headers: editing ? { Authorization: `Bearer ${token}` } : {},
+      body: formData
+    });
+
+    closeModal();
+    loadFoods();
+  });
+
+  loadFoods();
+</script>
+
+</body>
+</html>

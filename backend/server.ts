@@ -104,6 +104,37 @@ app.get("/", (req: Request, res: Response) => {
   res.json({ message: "Restaurant API is running" });
 });
 
+// Admin views
+const adminViewsPath = path.join(__dirname, "admin-views");
+const adminPublicPath = path.join(__dirname, "admin", "public");
+
+app.use("/admin/static", express.static(adminPublicPath));
+
+app.get("/admin", (_, res) => {
+  res.sendFile(path.join(adminViewsPath, "login.html"));
+});
+
+app.get("/admin/dashboard", (_, res) => {
+  res.sendFile(path.join(adminViewsPath, "dashboard.html"));
+});
+
+app.get("/admin/foods", (_, res) => {
+  res.sendFile(path.join(adminViewsPath, "foods.html"));
+});
+
+app.get("/admin/foods/add", (_, res) => {
+  res.sendFile(path.join(adminViewsPath, "add-food.html"));
+});
+
+app.get("/admin/foods/edit/:id", (_, res) => {
+  res.sendFile(path.join(adminViewsPath, "edit-food.html"));
+});
+
+app.get("/admin/orders", (_, res) => {
+  res.sendFile(path.join(adminViewsPath, "orders.html"));
+});
+
+
 // ===============================
 // Database + Server Start
 // ===============================

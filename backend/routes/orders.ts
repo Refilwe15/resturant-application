@@ -78,4 +78,70 @@ router.get("/", authMiddleware, async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/orders/{id}/status:
+ *   put:
+ *     summary: Update order status (Admin)
+ */
+router.put("/:id/status", authMiddleware, async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(403).json({ message: "Admins only" });
+    }
+
+    const { id } = req.params;
+    const { orderStatus } = req.body;
+
+    if (!orderStatus) {
+      return res.status(400).json({ message: "orderStatus is required" });
+    }
+
+    const order = await Order.findByPk(id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    await order.update({ orderStatus });
+
+    return res.json({
+      success: true,
+      message: "Order status updated",
+      order,
+    });
+  } catch (err: any) {
+    console.error("PUT /orders/:id/status error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+/**
+ * @swagger
+ * /api/orders/my-orders:
+ *   get:
+ *     summary: Get orders belonging to the logged-in user
+ * 
+ */
+router.get("/my-orders", authMiddleware, async (req: Request, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+
+    // Fetch orders for the current user only
+    const orders = await Order.findAll({
+      where: { userId: req.user.id },
+      order: [["createdAt", "DESC"]],
+    });
+
+    return res.json({
+      success: true,
+      message: "User orders fetched successfully",
+      orders,
+    });
+  } catch (err: any) {
+    console.error("GET /orders/my-orders error:", err);
+    return res.status(500).json({ success: false, message: "Server error", error: err.message });
+  }
+});
+
+
+
 export default router;

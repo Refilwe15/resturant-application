@@ -18,7 +18,7 @@ import { useCart } from "../../context/CartContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /* CHANGE TO YOUR LAPTOP IP */
-const BASE_URL = "http://10.196.0.142:8000";
+const BASE_URL = "https://restu-back.onrender.com";
 const FOOD_ENDPOINT = `${BASE_URL}/api/foods`;
 
 /* -------------------- EXTRAS ---------------- */

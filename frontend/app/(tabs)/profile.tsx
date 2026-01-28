@@ -14,6 +14,8 @@ import {
 import { Feather, Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
+import { useRouter } from "expo-router";
+
 
 /* -------------------- TYPES -------------------- */
 type User = {
@@ -43,6 +45,7 @@ export default function ProfileScreen() {
 
   // Payment state
   const [cardDetails, setCardDetails] = useState("");
+    const router = useRouter();
 
   /* Load user data from storage on mount */
   useEffect(() => {
@@ -68,13 +71,24 @@ export default function ProfileScreen() {
   }, []);
 
   /* -------------------- LOGOUT -------------------- */
-  const handleLogout = async () => {
+/* -------------------- LOGOUT -------------------- */
+const handleLogout = async () => {
+  try {
+    // Remove token and user from storage
     await AsyncStorage.multiRemove(["token", "user"]);
-    // You can also navigate out here if using router
-    // router.replace("/(onboarding)");
+
+    // Reset state
     setUser(null);
     setActiveTab("info");
-  };
+
+    // Navigate to onboarding/login screen
+    router.replace("/(onboarding)"); // <-- replace with your actual onboarding/login route
+  } catch (err) {
+    console.log("Logout error:", err);
+    Alert.alert("Error", "Failed to logout");
+  }
+};
+
 
   /* -------------------- ADDRESS -------------------- */
   const useCurrentLocation = async () => {
@@ -117,7 +131,7 @@ export default function ProfileScreen() {
     }
 
     try {
-      const res = await fetch("http://10.196.0.142:8000/api/users/profile", {
+      const res = await fetch("https://restu-back.onrender.com/api/users/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -157,7 +171,7 @@ export default function ProfileScreen() {
     }
 
     try {
-      const res = await fetch("http://10.196.0.142:8000/api/users/profile", {
+      const res = await fetch("https://restu-back.onrender.com/api/users/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -196,7 +210,7 @@ export default function ProfileScreen() {
     }
 
     try {
-      const res = await fetch("http://10.196.0.142:8000/api/users/profile", {
+      const res = await fetch("https://restu-back.onrender.com/api/users/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -292,6 +306,12 @@ export default function ProfileScreen() {
             title="Edit Profile"
             subtitle="Update your info"
             onPress={() => setActiveTab("edit")}
+          />
+                    <ProfileItem
+            icon="create-outline"
+            title="Edit Profile"
+            subtitle="Update your info"
+            onPress={handleLogout}
           />
         </View>
 
