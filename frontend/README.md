@@ -1,50 +1,52 @@
-# Welcome to your Expo app 👋
+## Project Overview
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+An application designed to manage restaurant operations, including menu management, order handling, customer management, and reporting. This app aims to streamline restaurant processes, enhance customer experience, and improve operational efficiency.
 
-## Get started
+## Key Features
 
-1. Install dependencies
+```Admin```
 
-   ```bash
-   npm install
-   ```
+- Full access to manage menus, orders, and user accounts.
 
-2. Start the app
+```Customers```
 
-   ```bash
-   npx expo start
-   ```
+- Can browse the menu, place orders, and provide feedback.
 
-In the output, you'll find options to open the app in a
+- Customer registration and login.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- View order history and manage account details.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-## Get a fresh project
+## Tech Stack
 
-When you're ready, run:
+``` Frontend ```
 
-```bash
-npm run reset-project
-```
+- React Native
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+- CSS 
 
-## Learn more
+``` Backend ```
 
-To learn more about developing your project with Expo, look at the following resources:
+- SQLite
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- Postgres
 
-## Join the community
+- Typescript
 
-Join our community of developers creating universal apps.
+- Strip epayment gateway
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- Multer (handling Picture Getaway)
+
+- JWT(authentication and authourisation)
+
+- Express Web API 
+
+## Figma Design Link
+
+- https://www.figma.com/design/Le3OeHlQ6aHE4AaspGGIGy/Resturant-App?node-id=1-3&p=f&t=FkIDPj8xvBG4DJ2t-0
+
+
+## How to run the app
+
+
+
