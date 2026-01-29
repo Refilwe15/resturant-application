@@ -14,7 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
 
 // 🔥 CHANGE BASED ON ENV
-const API_URL = "https://restu-back.onrender.com/api/auth/login";
+const API_URL = "http://10.0.0.113:8000/api/auth/login";
 // Android emulator ↑
 // iOS simulator → http://localhost:8000
 

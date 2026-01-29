@@ -84,7 +84,7 @@ export default function CartScreen() {
 
       if (paymentMethod === "card") {
         const paymentRes = await fetch(
-          "https://restu-back.onrender.com/api/payment/create-payment-intent",
+          "http://10.0.0.113:8000/api/payment/create-payment-intent",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -112,7 +112,7 @@ export default function CartScreen() {
 
       const token = await AsyncStorage.getItem("token");
 
-      const orderRes = await fetch("https://restu-back.onrender.com/api/orders", {
+      const orderRes = await fetch("http://10.0.0.113:8000/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -162,7 +162,7 @@ export default function CartScreen() {
   const renderItem = ({ item }: any) => (
     <View style={styles.cartItem}>
       <Image
-        source={{ uri: `https://restu-back.onrender.com${item.image}` }}
+        source={{ uri: `http://10.0.0.113:8000${item.image}` }}
         style={styles.cartImage}
       />
       <View style={{ flex: 1, marginLeft: 12 }}>

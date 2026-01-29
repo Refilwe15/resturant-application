@@ -1,95 +1,63 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard</title>
 
-  <!-- Google Fonts -->
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Inter, sans-serif; }
+    body { display: flex; min-height: 100vh; background: #f4f6f9; }
 
-    body {
-      display: flex;
-      min-height: 100vh;
-      background: #f4f6f9;
-    }
-
-    /* Sidebar */
     .sidebar {
       width: 260px;
-      background-color: white;
-      color: black;
+      background: #fff;
       padding: 20px;
       display: flex;
       flex-direction: column;
     }
 
     .sidebar h2 {
-      margin-bottom: 40px;
-      font-size: 26px;
-      font-weight: 700;
       text-align: center;
+      margin-bottom: 40px;
       color: #FF6B35;
     }
 
     .sidebar a {
-      color: #cbd5e1;
-      text-decoration: none;
       padding: 14px;
-      margin-bottom: 10px;
+      text-decoration: none;
       border-radius: 8px;
-      transition: 0.2s;
-      display: block;
+      margin-bottom: 10px;
+      color: #334155;
       font-weight: 500;
     }
 
-    .sidebar a:hover,
-    .sidebar a.active {
-      background-color: #FF6B35;
-      color: #fff;
+    .sidebar a.active,
+    .sidebar a:hover {
+      background: #FF6B35;
+      color: white;
     }
 
     .logout {
       margin-top: auto;
+      background: #EF4444;
       padding: 14px;
-      background-color: #EF4444;
-      text-align: center;
       border-radius: 8px;
-      font-weight: 600;
+      text-align: center;
+      color: white;
       cursor: pointer;
-      transition: 0.2s;
-      color: #fff;
     }
 
-    .logout:hover {
-      background-color: #DC2626;
-    }
+    .main { flex: 1; padding: 30px 40px; }
 
-    /* Main content */
-    .main {
-      flex: 1;
-      padding: 30px 40px;
-    }
+    .header { font-size: 28px; font-weight: 700; margin-bottom: 30px; }
 
-    .header {
-      font-size: 28px;
-      font-weight: 700;
-      color: #1E293B;
-      margin-bottom: 30px;
-    }
-
-    /* Stats Cards */
     .stats {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -98,32 +66,15 @@
     }
 
     .stat-card {
-      background-color: #fff;
-      border-radius: 12px;
+      background: white;
       padding: 25px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-      transition: transform 0.2s, box-shadow 0.2s;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
     }
 
-    .stat-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
-    }
+    .stat-card h3 { color: #64748B; font-size: 16px; }
+    .stat-card p { font-size: 28px; font-weight: 700; }
 
-    .stat-card h3 {
-      font-size: 18px;
-      color: #64748B;
-      margin-bottom: 10px;
-      font-weight: 600;
-    }
-
-    .stat-card p {
-      font-size: 28px;
-      font-weight: 700;
-      color: #1E293B;
-    }
-
-    /* Charts */
     .charts {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -132,211 +83,152 @@
     }
 
     .chart-container {
-      background: #fff;
+      background: white;
       padding: 20px;
       border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
     }
 
-    /* Recent Orders Table */
     table {
       width: 100%;
+      background: white;
       border-collapse: collapse;
-      background: #fff;
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
       margin-bottom: 40px;
     }
 
-    th,
-    td {
-      padding: 14px 16px;
+    th, td {
+      padding: 14px;
       border-bottom: 1px solid #eee;
       text-align: left;
-      font-size: 14px;
     }
 
-    th {
-      background: #f9fafb;
-      font-weight: 600;
-    }
-
-    tr:hover {
-      background: #f1f5f9;
-    }
-
-    /* Top-selling foods */
-    .top-foods {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .food-card {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      flex: 1 1 200px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-      text-align: center;
-      transition: transform 0.2s;
-    }
-
-    .food-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
-    }
-
-    .food-card img {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin-bottom: 10px;
-    }
-
-    .food-card h4 {
-      font-size: 16px;
-      margin-bottom: 5px;
-    }
-
-    .food-card p {
-      color: #64748B;
-      font-size: 14px;
-      margin-bottom: 0;
-    }
+    th { background: #f9fafb; }
   </style>
 </head>
 
 <body>
 
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <h2>Admin Panel</h2>
-    <a href="/admin/dashboard" class="active">Dashboard</a>
-    <a href="/admin/foods">Manage Foods</a>
-    <a href="/admin/orders">View Orders</a>
-    <a href="/admin/foods/add">Add Food</a>
-    <div class="logout" onclick="logout()">Logout</div>
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h2>Admin Panel</h2>
+  <a class="active" href="/admin/dashboard">Dashboard</a>
+  <a href="/admin/foods">Manage Foods</a>
+  <a href="/admin/orders">View Orders</a>
+  <a href="/admin/foods/add">Add Food</a>
+  <div class="logout" onclick="logout()">Logout</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="header">Dashboard</div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card">
+      <h3>Open Orders</h3>
+      <p id="openOrders">0</p>
+    </div>
+    <div class="stat-card">
+      <h3>Completed Orders</h3>
+      <p id="completedOrders">0</p>
+    </div>
+    <div class="stat-card">
+      <h3>Total Foods</h3>
+      <p id="totalFoods">0</p>
+    </div>
+    <div class="stat-card">
+      <h3>Total Revenue</h3>
+      <p id="totalRevenue">R0</p>
+    </div>
   </div>
 
-  <!-- Main -->
-  <div class="main">
-    <div class="header">Dashboard</div>
-
-    <!-- Stats Cards -->
-    <div class="stats">
-      <div class="stat-card">
-        <h3>Open Orders</h3>
-        <p id="openOrders">0</p>
-      </div>
-      <div class="stat-card">
-        <h3>Completed Orders</h3>
-        <p id="completedOrders">0</p>
-      </div>
-      <div class="stat-card">
-        <h3>Total Foods</h3>
-        <p id="totalFoods">0</p>
-      </div>
-      <div class="stat-card">
-        <h3>Total Revenue</h3>
-        <p id="totalRevenue">R0</p>
-      </div>
+  <!-- CHARTS -->
+  <div class="charts">
+    <div class="chart-container">
+      <canvas id="ordersChart"></canvas>
     </div>
-
-    <!-- Charts -->
-    <div class="charts">
-      <div class="chart-container">
-        <canvas id="ordersChart"></canvas>
-      </div>
-      <div class="chart-container">
-        <canvas id="revenueChart"></canvas>
-      </div>
+    <div class="chart-container">
+      <canvas id="revenueChart"></canvas>
     </div>
+  </div>
 
-    <!-- Recent Orders -->
-    <h3>Recent Orders</h3>
-    <table>
-      <thead>
+  <!-- RECENT ORDERS -->
+  <h3>Recent Orders</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Status</th>
+        <th>Total</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody id="recentOrders"></tbody>
+  </table>
+</div>
+
+<script>
+  const API_URL = "http://localhost:8000/api/admin/dashboard";
+  const token = localStorage.getItem("adminToken");
+
+  if (!token) location.href = "/admin";
+
+  function logout() {
+    localStorage.removeItem("adminToken");
+    location.href = "/admin";
+  }
+
+  async function loadDashboard() {
+    const res = await fetch(API_URL, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const data = await res.json();
+
+    // Stats
+    openOrders.innerText = data.stats.openOrders;
+    completedOrders.innerText = data.stats.completedOrders;
+    totalFoods.innerText = data.stats.totalFoods;
+    totalRevenue.innerText = `R${data.stats.totalRevenue}`;
+
+    // Orders table
+    recentOrders.innerHTML = "";
+    data.recentOrders.forEach(o => {
+      recentOrders.innerHTML += `
         <tr>
-          <th>Order ID</th>
-          <th>Customer</th>
-          <th>Status</th>
-          <th>Total</th>
+          <td>${o.id.slice(0, 8)}</td>
+          <td>${o.orderStatus}</td>
+          <td>R${o.totalPrice}</td>
+          <td>${new Date(o.createdAt).toLocaleDateString()}</td>
         </tr>
-      </thead>
-      <tbody id="recentOrders"></tbody>
-    </table>
+      `;
+    });
 
-    <!-- Top-selling Foods -->
-    <h3>Top Selling Foods</h3>
-    <div class="top-foods" id="topFoods"></div>
-  </div>
-
-  <script>
-    function logout() {
-      localStorage.removeItem("adminToken");
-      location.href = "/admin";
-    }
-
-    // Dummy stats (replace with API calls)
-    const stats = {
-      openOrders: 12,
-      completedOrders: 48,
-      totalFoods: 25,
-      totalRevenue: 12450
-    };
-
-    document.getElementById("openOrders").innerText = stats.openOrders;
-    document.getElementById("completedOrders").innerText = stats.completedOrders;
-    document.getElementById("totalFoods").innerText = stats.totalFoods;
-    document.getElementById("totalRevenue").innerText = `R${stats.totalRevenue}`;
-
-    // Dummy chart data
-    const ordersChart = new Chart(document.getElementById('ordersChart'), {
-      type: 'line',
+    // Charts
+    new Chart(ordersChart, {
+      type: "line",
       data: {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [{ label: 'Orders', data: [5, 7, 10, 8, 6, 12, 9], backgroundColor: 'rgba(255,107,53,0.2)', borderColor: '#FF6B35', borderWidth: 2, fill: true }]
+        labels: data.ordersByDay.map(d => d.date),
+        datasets: [{ data: data.ordersByDay.map(d => d.count), fill: true }]
       },
-      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      options: { plugins: { legend: { display: false } } }
     });
 
-    const revenueChart = new Chart(document.getElementById('revenueChart'), {
-      type: 'bar',
+    new Chart(revenueChart, {
+      type: "bar",
       data: {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [{ label: 'Revenue', data: [1200, 1500, 2000, 1800, 1600, 2200, 1950], backgroundColor: '#FF6B35' }]
+        labels: data.revenueByDay.map(d => d.date),
+        datasets: [{ data: data.revenueByDay.map(d => d.total) }]
       },
-      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      options: { plugins: { legend: { display: false } } }
     });
+  }
 
-    // Dummy recent orders
-    const recentOrders = [
-      { id: '#1023', customer: 'Alice', status: 'Open', total: 'R250' },
-      { id: '#1022', customer: 'Bob', status: 'Completed', total: 'R150' },
-      { id: '#1021', customer: 'Charlie', status: 'Open', total: 'R320' },
-      { id: '#1020', customer: 'Diana', status: 'Completed', total: 'R200' },
-      { id: '#1019', customer: 'Eve', status: 'Completed', total: 'R450' },
-    ];
-    const ordersTable = document.getElementById('recentOrders');
-    recentOrders.forEach(order => {
-      const row = `<tr>
-        <td>${order.id}</td>
-        <td>${order.customer}</td>
-        <td>${order.status}</td>
-        <td>${order.total}</td>
-      </tr>`;
-      ordersTable.innerHTML += row;
-    });
-
-    // Dummy top foods
-
-
-
-  </script>
+  loadDashboard();
+</script>
 
 </body>
-
 </html>

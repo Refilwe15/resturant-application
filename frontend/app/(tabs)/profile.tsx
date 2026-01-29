@@ -131,7 +131,7 @@ const handleLogout = async () => {
     }
 
     try {
-      const res = await fetch("https://restu-back.onrender.com/api/users/profile", {
+      const res = await fetch("http://10.0.0.113:8000/api/users/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -171,7 +171,7 @@ const handleLogout = async () => {
     }
 
     try {
-      const res = await fetch("https://restu-back.onrender.com/api/users/profile", {
+      const res = await fetch("http://10.0.0.113:8000/api/users/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -210,7 +210,7 @@ const handleLogout = async () => {
     }
 
     try {
-      const res = await fetch("https://restu-back.onrender.com/api/users/profile", {
+      const res = await fetch("http://10.0.0.113:8000/api/users/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

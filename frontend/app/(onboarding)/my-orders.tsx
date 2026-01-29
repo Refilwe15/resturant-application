@@ -40,7 +40,7 @@ export default function OrdersScreen() {
     setLoading(true);
     try {
       const token = await AsyncStorage.getItem("token");
-      const res = await fetch("https://restu-back.onrender.com/api/orders/my-orders", {
+      const res = await fetch("http://10.0.0.113:8000/api/orders/my-orders", {
         headers: { Authorization: `Bearer ${token}` },
       });
 

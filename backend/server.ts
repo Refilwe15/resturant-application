@@ -11,6 +11,8 @@ import userRoutes from "./routes/users.ts";
 import foodRoutes from "./routes/foods.ts";
 import cartRoutes from "./routes/cart.ts";
 import orderRoutes from "./routes/orders.ts";
+import adminDashboardRouter from "./routes/adminDashboard.ts"
+import adminOrdersRouter from "./routes/adminOrders.ts";
 
 import fs from "fs";
 import { fileURLToPath } from "url";
@@ -45,6 +47,11 @@ app.use("/api/users", userRoutes);
 app.use("/api/foods", foodRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/admin", adminDashboardRouter);
+
+
+app.use("/api/admin", adminOrdersRouter);
+
 
 // ===============================
 // Stripe Payment
