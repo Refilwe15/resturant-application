@@ -1,3 +1,4 @@
+/* ==================== IMPORTS ==================== */
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -16,8 +17,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 
-
-/* -------------------- TYPES -------------------- */
+/* ==================== TYPES ==================== */
 type User = {
   id: string;
   name: string;
@@ -27,35 +27,28 @@ type User = {
   cardDetails?: string;
 };
 
-/* -------------------- MAIN PROFILE SCREEN -------------------- */
+/* ==================== MAIN SCREEN ==================== */
 export default function ProfileScreen() {
+  const router = useRouter();
+
+  /* ---------- STATE ---------- */
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Tab control: 'info', 'address', 'edit', 'payment'
-  const [activeTab, setActiveTab] = useState<"info" | "address" | "edit" | "payment">("info");
+  const [activeTab, setActiveTab] =
+    useState<"info" | "address" | "edit" | "payment">("info");
 
-  // Form states for editing profile
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [email, setEmail] = useState("");
-
-  // Address state
   const [address, setAddress] = useState("");
-
-  // Payment state
   const [cardDetails, setCardDetails] = useState("");
-    const router = useRouter();
 
-  /* Load user data from storage on mount */
+  /* ==================== LOAD USER ==================== */
   useEffect(() => {
     const loadUser = async () => {
       const storedUser = await AsyncStorage.getItem("user");
-
-      if (!storedUser) {
-        // Redirect to onboarding if no user
-        return;
-      }
+      if (!storedUser) return;
 
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
@@ -70,65 +63,45 @@ export default function ProfileScreen() {
     loadUser();
   }, []);
 
-  /* -------------------- LOGOUT -------------------- */
-/* -------------------- LOGOUT -------------------- */
-const handleLogout = async () => {
-  try {
-    // Remove token and user from storage
-    await AsyncStorage.multiRemove(["token", "user"]);
+  /* ==================== LOGOUT ==================== */
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.multiRemove(["token", "user"]);
+      setUser(null);
+      setActiveTab("info");
+      router.replace("/(onboarding)");
+    } catch (err) {
+      Alert.alert("Error", "Failed to logout");
+    }
+  };
 
-    // Reset state
-    setUser(null);
-    setActiveTab("info");
-
-    // Navigate to onboarding/login screen
-    router.replace("/(onboarding)"); // <-- replace with your actual onboarding/login route
-  } catch (err) {
-    console.log("Logout error:", err);
-    Alert.alert("Error", "Failed to logout");
-  }
-};
-
-
-  /* -------------------- ADDRESS -------------------- */
+  /* ==================== ADDRESS ==================== */
   const useCurrentLocation = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permission denied");
-        return;
-      }
+      if (status !== "granted") return Alert.alert("Permission denied");
 
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
       });
 
       const places = await Location.reverseGeocodeAsync(location.coords);
-
       if (places.length > 0) {
-        const place = places[0];
-        const formatted = `${place.name ?? ""} ${
-          place.street ?? ""
-        }, ${place.city ?? ""}, ${place.region ?? ""}`;
-        setAddress(formatted);
+        const p = places[0];
+        setAddress(
+          `${p.name ?? ""} ${p.street ?? ""}, ${p.city ?? ""}, ${p.region ?? ""}`
+        );
       }
-    } catch (err) {
-      console.log(err);
-      Alert.alert("Error", "Failed to get current location");
+    } catch {
+      Alert.alert("Error", "Failed to get location");
     }
   };
 
   const saveAddress = async () => {
-    if (!address) {
-      Alert.alert("Address required");
-      return;
-    }
+    if (!address) return Alert.alert("Address required");
 
     const token = await AsyncStorage.getItem("token");
-    if (!token) {
-      Alert.alert("Not authenticated");
-      return;
-    }
+    if (!token) return Alert.alert("Not authenticated");
 
     try {
       const res = await fetch("http://10.0.0.113:8000/api/users/profile", {
@@ -141,101 +114,66 @@ const handleLogout = async () => {
       });
 
       const data = await res.json();
-
-      if (!res.ok) {
-        Alert.alert("Error", data.message || "Failed to update address");
-        return;
-      }
+      if (!res.ok) return Alert.alert("Error", data.message);
 
       await AsyncStorage.setItem("user", JSON.stringify(data.user));
       setUser(data.user);
-      Alert.alert("Success", "Address updated");
       setActiveTab("info");
-    } catch (err) {
-      console.log(err);
+    } catch {
       Alert.alert("Error", "Server unreachable");
     }
   };
 
-  /* -------------------- EDIT PROFILE -------------------- */
+  /* ==================== PROFILE ==================== */
   const handleSaveProfile = async () => {
-    if (!name || !surname || !email) {
-      Alert.alert("Please fill all fields");
-      return;
-    }
+    if (!name || !surname || !email)
+      return Alert.alert("Please fill all fields");
 
     const token = await AsyncStorage.getItem("token");
-    if (!token) {
-      Alert.alert("Not authenticated");
-      return;
-    }
+    if (!token) return Alert.alert("Not authenticated");
 
-    try {
-      const res = await fetch("http://10.0.0.113:8000/api/users/profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ name, surname, email }),
-      });
+    const res = await fetch("http://10.0.0.113:8000/api/users/profile", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ name, surname, email }),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
+    if (!res.ok) return Alert.alert("Error", data.message);
 
-      if (!res.ok) {
-        Alert.alert("Error", data.message || "Update failed");
-        return;
-      }
-
-      await AsyncStorage.setItem("user", JSON.stringify(data.user));
-      setUser(data.user);
-      Alert.alert("Success", "Profile updated");
-      setActiveTab("info");
-    } catch (err) {
-      Alert.alert("Error", "Something went wrong");
-    }
+    await AsyncStorage.setItem("user", JSON.stringify(data.user));
+    setUser(data.user);
+    setActiveTab("info");
   };
 
-  /* -------------------- PAYMENT -------------------- */
+  /* ==================== PAYMENT ==================== */
   const saveCard = async () => {
-    if (!cardDetails) {
-      Alert.alert("Enter card details");
-      return;
-    }
+    if (!cardDetails) return Alert.alert("Enter card details");
 
     const token = await AsyncStorage.getItem("token");
-    if (!token) {
-      Alert.alert("Not authenticated");
-      return;
-    }
+    if (!token) return Alert.alert("Not authenticated");
 
-    try {
-      const res = await fetch("http://10.0.0.113:8000/api/users/profile", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ cardDetails }),
-      });
+    const res = await fetch("http://10.0.0.113:8000/api/users/profile", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ cardDetails }),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
+    if (!res.ok) return Alert.alert("Error", "Failed to update card");
 
-      if (!res.ok) {
-        Alert.alert("Error", "Failed to update card");
-        return;
-      }
-
-      await AsyncStorage.setItem("user", JSON.stringify(data.user));
-      setUser(data.user);
-      Alert.alert("Success", "Payment method updated");
-      setActiveTab("info");
-    } catch (err) {
-      Alert.alert("Error", "Failed to update card");
-    }
+    await AsyncStorage.setItem("user", JSON.stringify(data.user));
+    setUser(data.user);
+    setActiveTab("info");
   };
 
-  /* -------------------- LOADING -------------------- */
+  /* ==================== LOADING ==================== */
   if (loading) {
     return (
       <View style={styles.loading}>
@@ -244,41 +182,37 @@ const handleLogout = async () => {
     );
   }
 
-  /* -------------------- TAB COMPONENTS -------------------- */
-
-  // Default info tab
+  /* ==================== INFO TAB ==================== */
   if (activeTab === "info") {
     return (
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => {}}>
-            <Feather name="arrow-left" size={22} color="#222" />
-          </TouchableOpacity>
-
+          <Feather name="arrow-left" size={22} />
           <Text style={styles.headerTitle}>Profile</Text>
-
-          <TouchableOpacity onPress={() => setActiveTab("info")}>
-            <Feather name="refresh-cw" size={20} color="#222" />
-          </TouchableOpacity>
+          <Feather name="refresh-cw" size={20} />
         </View>
 
-        {/* Profile Image */}
+        {/* Avatar */}
         <Image
           source={require("../../assets/images/profile.png")}
           style={styles.avatar}
         />
 
-        {/* User Data */}
+        {/* User Info */}
         <Text style={styles.name}>
           {user?.name} {user?.surname}
         </Text>
         <Text style={styles.email}>{user?.email}</Text>
-        <Text style={{ textAlign: "center", marginVertical: 10, color: "#555" }}>
+
+        <Text style={styles.infoText}>
           Address: {user?.address || "Not set"}
         </Text>
-        <Text style={{ textAlign: "center", marginBottom: 10, color: "#555" }}>
-          Card: {user?.cardDetails ? "**** **** **** " + user.cardDetails.slice(-4) : "Not set"}
+        <Text style={styles.infoText}>
+          Card:{" "}
+          {user?.cardDetails
+            ? "**** **** **** " + user.cardDetails.slice(-4)
+            : "Not set"}
         </Text>
 
         {/* Menu */}
@@ -287,52 +221,48 @@ const handleLogout = async () => {
             icon="receipt-outline"
             title="Order History"
             subtitle="Order Information"
-            onPress={() => Alert.alert("Coming Soon", "Order History feature coming soon")}
+            onPress={() => router.push("/(onboarding)/my-orders")}
           />
+
           <ProfileItem
             icon="card-outline"
             title="Payment Methods"
             subtitle="Pay Your Bill"
             onPress={() => setActiveTab("payment")}
           />
+
           <ProfileItem
             icon="location-outline"
             title="Delivery Addresses"
             subtitle="Your Delivery Addresses"
             onPress={() => setActiveTab("address")}
           />
+
           <ProfileItem
             icon="create-outline"
             title="Edit Profile"
             subtitle="Update your info"
             onPress={() => setActiveTab("edit")}
           />
-                    <ProfileItem
-            icon="create-outline"
-            title="Edit Profile"
-            subtitle="Update your info"
+
+          <ProfileItem
+            icon="log-out-outline"
+            title="Logout"
+            subtitle="Sign out of your account"
             onPress={handleLogout}
           />
         </View>
-
-        {/* Logout */}
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={18} color="#FFF" />
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
       </View>
     );
   }
 
-  /* -------------------- ADDRESS TAB -------------------- */
+  /* ==================== ADDRESS TAB ==================== */
   if (activeTab === "address") {
     return (
       <ScrollView style={styles.container}>
         <Text style={styles.title}>Delivery Address</Text>
-
         <TextInput
           style={styles.input}
-          placeholder="Enter delivery address"
           value={address}
           onChangeText={setAddress}
         />
@@ -344,60 +274,38 @@ const handleLogout = async () => {
         <TouchableOpacity style={styles.saveBtn} onPress={saveAddress}>
           <Text style={styles.saveText}>Save Address</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.saveBtn, { backgroundColor: "#ccc", marginTop: 10 }]}
-          onPress={() => setActiveTab("info")}
-        >
-          <Text style={[styles.saveText, { color: "#333" }]}>Cancel</Text>
-        </TouchableOpacity>
       </ScrollView>
     );
   }
 
-  /* -------------------- EDIT PROFILE TAB -------------------- */
+  /* ==================== EDIT TAB ==================== */
   if (activeTab === "edit") {
     return (
       <ScrollView style={styles.container}>
         <Text style={styles.title}>Edit Profile</Text>
 
-        <TextInput style={styles.input} placeholder="Name" value={name} onChangeText={setName} />
+        <TextInput style={styles.input} value={name} onChangeText={setName} />
         <TextInput
           style={styles.input}
-          placeholder="Surname"
           value={surname}
           onChangeText={setSurname}
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-        />
+        <TextInput style={styles.input} value={email} onChangeText={setEmail} />
 
         <TouchableOpacity style={styles.saveBtn} onPress={handleSaveProfile}>
           <Text style={styles.saveText}>Save Changes</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.saveBtn, { backgroundColor: "#ccc", marginTop: 10 }]}
-          onPress={() => setActiveTab("info")}
-        >
-          <Text style={[styles.saveText, { color: "#333" }]}>Cancel</Text>
         </TouchableOpacity>
       </ScrollView>
     );
   }
 
-  /* -------------------- PAYMENT TAB -------------------- */
+  /* ==================== PAYMENT TAB ==================== */
   if (activeTab === "payment") {
     return (
       <ScrollView style={styles.container}>
         <Text style={styles.title}>Payment Method</Text>
 
         <TextInput
-          placeholder="Card Number"
           style={styles.input}
           value={cardDetails}
           onChangeText={setCardDetails}
@@ -407,13 +315,6 @@ const handleLogout = async () => {
         <TouchableOpacity style={styles.saveBtn} onPress={saveCard}>
           <Text style={styles.saveText}>Save</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.saveBtn, { backgroundColor: "#ccc", marginTop: 10 }]}
-          onPress={() => setActiveTab("info")}
-        >
-          <Text style={[styles.saveText, { color: "#333" }]}>Cancel</Text>
-        </TouchableOpacity>
       </ScrollView>
     );
   }
@@ -421,30 +322,18 @@ const handleLogout = async () => {
   return null;
 }
 
-/* -------------------- REUSABLE PROFILE ITEM -------------------- */
-function ProfileItem({
-  icon,
-  title,
-  subtitle,
-  onPress,
-}: {
-  icon: any;
-  title: string;
-  subtitle: string;
-  onPress?: () => void;
-}) {
+/* ==================== PROFILE ITEM ==================== */
+function ProfileItem({ icon, title, subtitle, onPress }: any) {
   return (
     <TouchableOpacity style={styles.item} onPress={onPress}>
       <View style={styles.iconBox}>
-        <Ionicons name={icon} size={20} color="#222" />
+        <Ionicons name={icon} size={20} />
       </View>
-
       <View style={{ flex: 1 }}>
         <Text style={styles.itemTitle}>{title}</Text>
         <Text style={styles.itemSubtitle}>{subtitle}</Text>
       </View>
-
-      <Feather name="chevron-right" size={20} color="#999" />
+      <Feather name="chevron-right" size={20} />
     </TouchableOpacity>
   );
 }
@@ -455,7 +344,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFF",
     paddingHorizontal: 16,
-    paddingTop: 60,
+    paddingTop: 36, // ⬅️ moved down slightly (was 24)
   },
 
   loading: {
@@ -469,7 +358,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 30,
+    marginBottom: 24, // ⬅️ balanced
   },
   headerTitle: {
     fontSize: 18,
@@ -482,7 +371,7 @@ const styles = StyleSheet.create({
     height: 110,
     borderRadius: 55,
     alignSelf: "center",
-    marginBottom: 16,
+    marginBottom: 14, // ⬅️ slightly down
   },
 
   name: {
@@ -504,7 +393,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     paddingVertical: 12,
     borderRadius: 18,
-    marginTop: 20,
+    marginTop: 18, // ⬅️ slightly down
   },
   editText: {
     color: "#FFF",
@@ -513,7 +402,7 @@ const styles = StyleSheet.create({
   },
 
   menu: {
-    marginTop: 30,
+    marginTop: 24, // ⬅️ slightly down
   },
 
   item: {
@@ -555,7 +444,8 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 30,
+    marginTop: 24, // ⬅️ slightly down
+    marginBottom: 24, // ⬅️ keeps it visible
   },
   logoutText: {
     color: "#FFF",
@@ -577,7 +467,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: "#222",
-    marginBottom: 20,
+    marginBottom: 18, // ⬅️ slightly down
   },
 
   locationBtn: {
@@ -594,7 +484,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 18,
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 18,
   },
   saveText: {
     color: "#FFF",

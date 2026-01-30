@@ -12,6 +12,7 @@ import {
   Platform,
   Modal,
   ActivityIndicator,
+  ToastAndroid,
 } from "react-native";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
@@ -19,7 +20,7 @@ import React, { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { useCart } from "../../context/CartContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import OrderTrackingModal from "../../components/Ordertrackingmodal";
+
 
 export default function CartScreen() {
   const { cart, removeFromCart, clearCart } = useCart();
@@ -39,6 +40,13 @@ export default function CartScreen() {
   // Order Tracking Modal state
   const [showTrackingModal, setShowTrackingModal] = useState(false);
   const [currentOrderId, setCurrentOrderId] = useState("");
+const showToast = (message: string) => {
+  if (Platform.OS === "android") {
+    ToastAndroid.show(message, ToastAndroid.SHORT);
+  } else {
+    Alert.alert(message); // iOS fallback (non-blocking enough)
+  }
+};
 
   useEffect(() => {
     const loadAddress = async () => {
@@ -70,89 +78,83 @@ export default function CartScreen() {
 
   const totalAmount = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
 
-  const handleCheckout = async () => {
-    if (cart.length === 0) return Alert.alert("Cart is empty");
+const handleCheckout = async () => {
+  if (cart.length === 0) return Alert.alert("Cart is empty");
 
-    if (paymentMethod === "card" && !cardNumber) {
-      return Alert.alert("Enter card number");
-    }
+  if (paymentMethod === "card" && !cardNumber) {
+    return Alert.alert("Enter card number");
+  }
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      let paymentIntentId = null;
-
-      if (paymentMethod === "card") {
-        const paymentRes = await fetch(
-          "http://10.0.0.113:8000/api/payment/create-payment-intent",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              amount: Math.round(totalAmount * 100),
-              card: {
-                number: cardNumber,
-                exp_month: parseInt(expMonth),
-                exp_year: parseInt(expYear),
-                cvc,
-              },
-            }),
-          },
-        );
-
-        const paymentData = await paymentRes.json();
-
-        if (!paymentData.success) {
-          setLoading(false);
-          return Alert.alert("Payment Failed", paymentData.message);
+  try {
+    if (paymentMethod === "card") {
+      const paymentRes = await fetch(
+        "http://10.0.0.113:8000/api/payment/create-payment-intent",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: Math.round(totalAmount * 100),
+            card: {
+              number: cardNumber,
+              exp_month: parseInt(expMonth),
+              exp_year: parseInt(expYear),
+              cvc,
+            },
+          }),
         }
+      );
 
-        paymentIntentId = paymentData.paymentIntent.id;
-      }
-
-      const token = await AsyncStorage.getItem("token");
-
-      const orderRes = await fetch("http://10.0.0.113:8000/api/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          items: cart.map((item) => ({
-            foodId: item.id,
-            quantity: item.qty,
-            selectedExtras: item.extras || [],
-            notes: item.notes || "",
-          })),
-          totalPrice: totalAmount,
-          deliveryAddress: address,
-          paymentStatus: paymentMethod === "card" ? "paid" : "cash",
-        }),
-      });
-
-      const orderData = await orderRes.json();
-
-      if (!orderRes.ok) {
+      const paymentData = await paymentRes.json();
+      if (!paymentData.success) {
         setLoading(false);
-        return Alert.alert("Order Failed", "Try again");
+        return Alert.alert("Payment Failed", paymentData.message);
       }
-
-      // Extract order ID (adjust based on your API response structure)
-      const orderId = orderData._id || orderData.id || Date.now().toString();
-      
-      clearCart();
-      setLoading(false);
-      
-      // Show tracking modal instead of alert
-      setCurrentOrderId(orderId);
-      setShowTrackingModal(true);
-
-    } catch (err: any) {
-      Alert.alert("Error", err.message || "Something went wrong");
-      setLoading(false);
     }
-  };
+
+    const token = await AsyncStorage.getItem("token");
+
+    const orderRes = await fetch("http://10.0.0.113:8000/api/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        items: cart.map((item) => ({
+          foodId: item.id,
+          quantity: item.qty,
+          selectedExtras: item.extras || [],
+          notes: item.notes || "",
+        })),
+        totalPrice: totalAmount,
+        deliveryAddress: address,
+        paymentStatus: paymentMethod === "card" ? "paid" : "cash",
+      }),
+    });
+
+    if (!orderRes.ok) {
+      setLoading(false);
+      return Alert.alert("Order Failed", "Try again");
+    }
+
+    // ✅ SUCCESS FLOW
+    clearCart();
+    setLoading(false);
+
+    showToast("✅ Order placed successfully");
+
+    setTimeout(() => {
+      router.replace("/my-orders");
+    }, 800);
+
+  } catch (err: any) {
+    setLoading(false);
+    Alert.alert("Error", err.message || "Something went wrong");
+  }
+};
+
 
   const handleTrackingComplete = () => {
     setShowTrackingModal(false);
@@ -404,11 +406,7 @@ export default function CartScreen() {
       </Modal>
 
       {/* Order Tracking Modal */}
-      <OrderTrackingModal
-        visible={showTrackingModal}
-        orderId={currentOrderId}
-        onComplete={handleTrackingComplete}
-      />
+
     </>
   );
 }

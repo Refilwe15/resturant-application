@@ -48,5 +48,43 @@ An application designed to manage restaurant operations, including menu manageme
 
 ## How to run the app
 
+# Prerequisites
+.env file 
+
+```
+PORT=8000
+DB_HOST=localhost
+DB_NAME=postgres database name
+DB_USER=postgres database user
+DB_PASSWORD=postgres database password
+JWT_SECRET=supersecretkey
+STRIPE_SECRET_KEY=your stripe private key
+
+
+
+```
+
+# clone and run 
+
+```
+git clone https://github.com/Refilwe15/resturant-application.git
+
+cd resturant-application
+
+cd backend
+
+npm install
+
+npx tsx watch server.ts
+
+cd ..
+
+cd frontend
+
+npm install
+
+npx expo start
+
+```
 
 

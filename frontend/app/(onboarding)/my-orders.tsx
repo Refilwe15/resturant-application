@@ -7,9 +7,10 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Image,
+  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
 interface OrderItem {
@@ -18,12 +19,12 @@ interface OrderItem {
   paymentStatus: "paid" | "cash";
   deliveryAddress: string;
   createdAt: string;
-  orderStatus:string;
+  orderStatus: string;
   items: {
     name: string;
     qty: number;
     price: number;
-    image?: string; // food image URL
+    image?: string;
     extras?: { name: string }[];
   }[];
 }
@@ -40,23 +41,35 @@ export default function OrdersScreen() {
     setLoading(true);
     try {
       const token = await AsyncStorage.getItem("token");
-      const res = await fetch("http://10.0.0.113:8000/api/orders/my-orders", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      if (!token) {
+        Alert.alert("Error", "You are not logged in.");
+        setLoading(false);
+        return;
+      }
 
-      if (!res.ok) throw new Error("Failed to fetch orders");
+      const res = await fetch(
+        "http://10.0.0.113:8000/api/orders/my-orders",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Failed to fetch orders: ${text}`);
+      }
 
       const data = await res.json();
-      setOrders(data.orders || []);
+      const fetchedOrders: OrderItem[] = data.orders || data.data || [];
+      setOrders(fetchedOrders);
     } catch (err: any) {
-      console.log(err.message);
+      console.log(err);
+      Alert.alert("Error", err.message || "Failed to fetch orders");
     } finally {
       setLoading(false);
     }
   };
 
   const renderItem = ({ item }: { item: OrderItem }) => {
-    const totalPrice = item.totalPrice || 0; // fix RNaN
+    const isPaid = item.paymentStatus === "paid";
 
     return (
       <View style={styles.orderCard}>
@@ -66,41 +79,59 @@ export default function OrdersScreen() {
           <View
             style={[
               styles.statusBadge,
-              {
-                backgroundColor: item.paymentStatus === "paid" ? "#E8F5E9" : "#FFF7E0",
-              },
+              { backgroundColor: isPaid ? "#E0F7EA" : "#FFF4E5" },
             ]}
           >
             <Text
               style={[
                 styles.statusText,
-                { color: item.paymentStatus === "paid" ? "#4CAF50" : "#F4B400" },
+                { color: isPaid ? "#2E7D32" : "#F57C00" },
               ]}
             >
-              {item.paymentStatus === "paid" ? "Paid" : "Cash"}
+              {isPaid ? "Paid" : "Cash"}
             </Text>
           </View>
+        </View>
+
+        {/* Order Status */}
+        <View style={styles.orderStatus}>
+          <MaterialIcons
+            name={
+              item.orderStatus.toLowerCase() === "delivered"
+                ? "check-circle"
+                : "pending-actions"
+            }
+            size={20}
+            color={item.orderStatus.toLowerCase() === "delivered" ? "#4CAF50" : "#F4B400"}
+          />
+          <Text style={styles.statusLabel}>{item.orderStatus}</Text>
         </View>
 
         {/* Items */}
         <View style={styles.itemsList}>
           {item.items.map((food, index) => (
             <View key={index} style={styles.itemRow}>
-              {food.image && <Image source={{ uri: food.image }} style={styles.foodImage} />}
+              {food.image && (
+                <Image source={{ uri: food.image }} style={styles.foodImage} />
+              )}
               <View style={{ flex: 1 }}>
-                 <Text style={styles.addressLabel}>{item.orderStatus}</Text>
-                <Text style={styles.itemExtras}>
-                  {food.extras?.map(e => e.name).join(", ")}
+                <Text style={styles.itemName}>
+                  {food.name} x {food.qty}
                 </Text>
+                {food.extras && food.extras.length > 0 && (
+                  <Text style={styles.itemExtras}>
+                    Extras: {food.extras.map((e) => e.name).join(", ")}
+                  </Text>
+                )}
               </View>
-             
+              <Text style={styles.itemPrice}>R{food.price}</Text>
             </View>
           ))}
         </View>
 
         {/* Footer */}
         <View style={styles.orderFooter}>
-          <Text style={styles.totalLabel}>Total: R{totalPrice.toFixed(2)}</Text>
+          <Text style={styles.totalLabel}>Total: R{item.totalPrice}</Text>
           <Text style={styles.addressLabel}>{item.deliveryAddress}</Text>
           <Text style={styles.dateLabel}>
             {new Date(item.createdAt).toLocaleDateString()}{" "}
@@ -118,7 +149,7 @@ export default function OrdersScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Feather name="arrow-left" size={22} color="#000" />
         </TouchableOpacity>
         <Text style={styles.title}>My Orders</Text>
@@ -131,7 +162,9 @@ export default function OrdersScreen() {
       ) : orders.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>No orders yet</Text>
-          <Text style={styles.emptySubtext}>Place some orders to see them here</Text>
+          <Text style={styles.emptySubtext}>
+            Place some orders to see them here
+          </Text>
         </View>
       ) : (
         <FlatList
@@ -146,7 +179,7 @@ export default function OrdersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFF" },
+  container: { flex: 1, backgroundColor: "#FAFAFA" },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -154,51 +187,62 @@ const styles = StyleSheet.create({
     padding: 16,
     marginTop: 10,
   },
+  backBtn: {
+    padding: 6,
+    borderRadius: 8,
+    backgroundColor: "#EEE",
+  },
   title: { fontSize: 22, fontWeight: "800", color: "#000" },
-  emptyContainer: { alignItems: "center", justifyContent: "center", marginTop: 100 },
+
+  emptyContainer: { flex: 1, alignItems: "center", justifyContent: "center", marginTop: 50 },
   emptyText: { fontSize: 18, fontWeight: "700", color: "#333" },
   emptySubtext: { fontSize: 14, color: "#999", marginTop: 4 },
 
   orderCard: {
-    backgroundColor: "#F9F9F9",
-    borderRadius: 12,
+    backgroundColor: "#FFF",
+    borderRadius: 16,
     padding: 16,
-    marginVertical: 8,
-    borderWidth: 1,
-    borderColor: "#EFEFEF",
+    marginVertical: 10,
     shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 8,
+    elevation: 4,
   },
   orderHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 10,
   },
   orderId: { fontWeight: "700", fontSize: 14, color: "#000" },
 
   statusBadge: {
     paddingVertical: 4,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     borderRadius: 12,
   },
   statusText: { fontWeight: "700", fontSize: 12 },
 
-  itemsList: { borderTopWidth: 1, borderTopColor: "#EEE", paddingTop: 8, marginBottom: 8 },
+  orderStatus: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  statusLabel: { marginLeft: 6, fontWeight: "600", color: "#333" },
+
+  itemsList: { borderTopWidth: 1, borderTopColor: "#EEE", paddingTop: 10, marginBottom: 10 },
   itemRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
     alignItems: "center",
+    marginBottom: 8,
   },
-  foodImage: { width: 40, height: 40, borderRadius: 6, marginRight: 8 },
-  itemName: { fontSize: 14, color: "#333", fontWeight: "600" },
-  itemExtras: { fontSize: 12, color: "#999" },
-  itemPrice: { fontSize: 14, fontWeight: "700", color: "#F4B400" },
+  foodImage: { width: 50, height: 50, borderRadius: 8, marginRight: 12 },
+  itemName: { fontSize: 14, fontWeight: "600", color: "#333" },
+  itemExtras: { fontSize: 12, color: "#999", marginTop: 2 },
+  itemPrice: { fontSize: 14, fontWeight: "700", color: "#F4B400", marginLeft: 8 },
 
-  orderFooter: { borderTopWidth: 1, borderTopColor: "#EEE", paddingTop: 8 },
+  orderFooter: { borderTopWidth: 1, borderTopColor: "#EEE", paddingTop: 10 },
   totalLabel: { fontWeight: "700", fontSize: 14, marginBottom: 4 },
   addressLabel: { fontSize: 12, color: "#666", marginBottom: 2 },
   dateLabel: { fontSize: 11, color: "#999" },
