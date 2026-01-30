@@ -87,4 +87,11 @@ npx expo start
 
 ```
 
+## Run admin side
+
+
+``` 
+
+http://localhost:8000/admin
+
 
