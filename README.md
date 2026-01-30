@@ -94,4 +94,9 @@ npx expo start
 
 http://localhost:8000/admin
 
+## ADMIN LOGIN CREDENTIALS ##
+
+email : a@a.com
+password : 1234
+
 
