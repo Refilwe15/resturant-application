@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Inter, sans-serif; }
+    body { display: flex; min-height: 100vh; background: #f4f6f9; }
+
+    .sidebar {
+      width: 260px;
+      background: #fff;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 40px;
+      color: #FF6B35;
+    }
+
+    .sidebar a {
+      padding: 14px;
+      text-decoration: none;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      color: #334155;
+      font-weight: 500;
+    }
+
+    .sidebar a.active,
+    .sidebar a:hover {
+      background: #FF6B35;
+      color: white;
+    }
+
+    .logout {
+      margin-top: auto;
+      background: #EF4444;
+      padding: 14px;
+      border-radius: 8px;
+      text-align: center;
+      color: white;
+      cursor: pointer;
+    }
+
+    .main { flex: 1; padding: 30px 40px; }
+
+    .header { font-size: 28px; font-weight: 700; margin-bottom: 30px; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+
+    .stat-card h3 { color: #64748B; font-size: 16px; }
+    .stat-card p { font-size: 28px; font-weight: 700; }
+
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .chart-container {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+
+    table {
+      width: 100%;
+      background: white;
+      border-collapse: collapse;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      margin-bottom: 40px;
+    }
+
+    th, td {
+      padding: 14px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+
+    th { background: #f9fafb; }
+  </style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h2>Admin Panel</h2>
+  <a class="active" href="/admin/dashboard">Dashboard</a>
+  <a href="/admin/foods">Manage Foods</a>
+  <a href="/admin/orders">View Orders</a>
+  <a href="/admin/foods/add">Add Food</a>
+  <div class="logout" onclick="logout()">Logout</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="header">Dashboard</div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card">
+      <h3>Open Orders</h3>
+      <p id="openOrders">0</p>
+    </div>
+    <div class="stat-card">
+      <h3>Completed Orders</h3>
+      <p id="completedOrders">0</p>
+    </div>
+    <div class="stat-card">
+      <h3>Total Foods</h3>
+      <p id="totalFoods">0</p>
+    </div>
+    <div class="stat-card">
+      <h3>Total Revenue</h3>
+      <p id="totalRevenue">R0</p>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="charts">
+    <div class="chart-container">
+      <canvas id="ordersChart"></canvas>
+    </div>
+    <div class="chart-container">
+      <canvas id="revenueChart"></canvas>
+    </div>
+  </div>
+
+  <!-- RECENT ORDERS -->
+  <h3>Recent Orders</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Status</th>
+        <th>Total</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody id="recentOrders"></tbody>
+  </table>
+</div>
+
+<script>
+  const API_URL = "https://restu-back.onrender.com/api/admin/dashboard";
+  const token = localStorage.getItem("adminToken");
+
+  if (!token) location.href = "/admin";
+
+  function logout() {
+    localStorage.removeItem("adminToken");
+    location.href = "/admin";
+  }
+
+  async function loadDashboard() {
+    const res = await fetch(API_URL, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const data = await res.json();
+
+    // Stats
+    openOrders.innerText = data.stats.openOrders;
+    completedOrders.innerText = data.stats.completedOrders;
+    totalFoods.innerText = data.stats.totalFoods;
+    totalRevenue.innerText = `R${data.stats.totalRevenue}`;
+
+    // Orders table
+    recentOrders.innerHTML = "";
+    data.recentOrders.forEach(o => {
+      recentOrders.innerHTML += `
+        <tr>
+          <td>${o.id.slice(0, 8)}</td>
+          <td>${o.orderStatus}</td>
+          <td>R${o.totalPrice}</td>
+          <td>${new Date(o.createdAt).toLocaleDateString()}</td>
+        </tr>
+      `;
+    });
+
+    // Charts
+    new Chart(ordersChart, {
+      type: "line",
+      data: {
+        labels: data.ordersByDay.map(d => d.date),
+        datasets: [{ data: data.ordersByDay.map(d => d.count), fill: true }]
+      },
+      options: { plugins: { legend: { display: false } } }
+    });
+
+    new Chart(revenueChart, {
+      type: "bar",
+      data: {
+        labels: data.revenueByDay.map(d => d.date),
+        datasets: [{ data: data.revenueByDay.map(d => d.total) }]
+      },
+      options: { plugins: { legend: { display: false } } }
+    });
+  }
+
+  loadDashboard();
+</script>
+
+</body>
+</html>

@@ -66,6 +66,8 @@ STRIPE_SECRET_KEY=your stripe private key
 
 # clone and run 
 
+NB : The backend is not yet deployed . Please replace the IP_ADDRESS on frontend/config/api.ts with your PC IP_ADDRESS.
+
 ```
 git clone https://github.com/Refilwe15/resturant-application.git
 

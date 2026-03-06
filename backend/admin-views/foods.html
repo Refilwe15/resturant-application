@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Foods</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { display: flex; min-height: 100vh; background: #f4f6f9; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background-color: white;
+      color: #fff;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 40px;
+      font-size: 26px;
+      font-weight: 800;
+      color: #FF6B35;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .sidebar a {
+      color: #cbd5e1;
+      text-decoration: none;
+      padding: 14px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      transition: 0.2s;
+      font-weight: 500;
+    }
+
+    .sidebar a:hover,
+    .sidebar a.active {
+      background-color: #FF6B35;
+      color: #fff;
+    }
+
+    .logout {
+      margin-top: auto;
+      padding: 14px;
+      background-color: #EF4444;
+      text-align: center;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .logout:hover { background-color: #DC2626; }
+
+    /* Main */
+    .main {
+      flex: 1;
+      padding: 30px 40px;
+    }
+
+    .header {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1E293B;
+      margin-bottom: 25px;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+
+    th, td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f9fafb;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    tr:hover { background: #f1f5f9; }
+
+    img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .btn-edit {
+      background: #F59E0B;
+      color: #000;
+      margin-right: 6px;
+    }
+
+    .btn-edit:hover { background: #D97706; }
+
+    .btn-delete {
+      background: #EF4444;
+      color: #fff;
+    }
+
+    .btn-delete:hover { background: #DC2626; }
+  </style>
+</head>
+
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo">Admin Panel</div>
+    <a href="/admin/dashboard">Dashboard</a>
+    <a href="/admin/foods" class="active">Manage Foods</a>
+    <a href="/admin/orders">View Orders</a>
+    <a href="/admin/foods/add">Add Food</a>
+    <div class="logout" onclick="logout()">Logout</div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="header">Food Management</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Price</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="foodTable"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const API = "/api/foods";
+    const token = localStorage.getItem("adminToken");
+    const table = document.getElementById("foodTable");
+
+    async function loadFoods() {
+      const res = await fetch(API, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const foods = await res.json();
+      table.innerHTML = "";
+
+      foods.forEach(food => {
+        table.innerHTML += `
+          <tr>
+            <td>${food.image ? `<img src="${food.image}" />` : "-"}</td>
+            <td>${food.name}</td>
+            <td>${food.type}</td>
+            <td>R${food.price}</td>
+            <td>
+              <button class="btn btn-edit" onclick="location.href='/admin/foods/edit/${food.id}'">Edit</button>
+              <button class="btn btn-delete" onclick="deleteFood('${food.id}')">Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    async function deleteFood(id) {
+      if (!confirm("Delete this food?")) return;
+      await fetch(`${API}/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      loadFoods();
+    }
+
+    function logout() {
+      localStorage.removeItem("adminToken");
+      location.href = "/admin";
+    }
+
+    loadFoods();
+  </script>
+
+</body>
+</html>
