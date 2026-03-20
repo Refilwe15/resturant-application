@@ -2,17 +2,17 @@ import "dotenv/config";
 import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import path from "path";
-import { sequelize } from "./config/db.ts"; // Your DB config
+import { sequelize } from "./config/db"; // Your DB config
 import swaggerUi from "swagger-ui-express";
-import { swaggerSpec } from "./config/swagger.ts";
+import { swaggerSpec } from "./config/swagger";
 
-import authRoutes from "./routes/auth.ts";
-import userRoutes from "./routes/users.ts";
-import foodRoutes from "./routes/foods.ts";
-import cartRoutes from "./routes/cart.ts";
-import orderRoutes from "./routes/orders.ts";
-import adminDashboardRouter from "./routes/adminDashboard.ts"
-import adminOrdersRouter from "./routes/adminOrders.ts";
+import authRoutes from "./routes/auth";
+import userRoutes from "./routes/users";
+import foodRoutes from "./routes/foods";
+import cartRoutes from "./routes/cart";
+import orderRoutes from "./routes/orders";
+import adminDashboardRouter from "./routes/adminDashboard"
+import adminOrdersRouter from "./routes/adminOrders";
 
 import fs from "fs";
 import { fileURLToPath } from "url";

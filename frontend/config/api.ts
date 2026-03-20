@@ -11,7 +11,7 @@ import { Platform } from "react-native";
 // simulator can use localhost, but physical phones must reach your
 // computer over the local network using its LAN IP.  Set `LOCAL_IP`
 // to whatever `ipconfig`/`ifconfig` shows for your machine.
-const LOCAL_IP = "10.196.0.162"; // <-- change me when testing on a device
+const LOCAL_IP = "10.196.0.195"; // <-- change me when testing on a device
 
 export const API_BASE_URL = (() => {
     if (Platform.OS === "android") {
