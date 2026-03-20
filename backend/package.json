@@ -4,11 +4,11 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"No tests\" && exit 0",
-    "dev": "tsx watch server.ts",
-    "start": "node dist/server.js",
-    "build": "tsc"
-  },
+  "test": "echo \"No tests\" && exit 0",
+  "dev": "tsx watch server.ts",
+  "build": "echo 'no build needed'",
+  "start": "npx tsx server.ts"
+} ,
   "keywords": [],
   "author": "",
   "license": "ISC",
