@@ -2,12 +2,9 @@
 
 # dependencies
 node_modules/
-<<<<<<< HEAD
-=======
 backend/node_modules/
 frontend/node_modules/
 backend/env
->>>>>>> 5d6ff88f1704bfbc487abaff46f487a30bde1ff2
 
 # Expo
 .expo/
@@ -47,3 +44,7 @@ app-example
 # generated native folders
 /ios
 /android
+backend/.env
+backend/migration-data.json
+backend/export-sqlite.js
+backend/.env

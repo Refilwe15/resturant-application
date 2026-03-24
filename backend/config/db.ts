@@ -1,24 +1,23 @@
 import { Sequelize } from "sequelize";
-import path from "path";
-import { fileURLToPath } from "url";
 
-// Fix __dirname for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const DATABASE_URL = process.env.DATABASE_URL  || `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_URL}`;
 
-// Initialize Sequelize (SQLite)
-export const sequelize = new Sequelize({
-    dialect: "sqlite",
-    storage: path.join(__dirname, "../database.sqlite"),
-    logging: false,
+export const sequelize = new Sequelize(DATABASE_URL, {
+  dialect: "postgres",
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
+    },
+  },
+  logging: false,
 });
 
-// Test connection
 export const testConnection = async () => {
-    try {
-        await sequelize.authenticate();
-        console.log("✅ SQLite connection has been established successfully.");
-    } catch (error) {
-        console.error("❌ Unable to connect to SQLite:", error);
-    }
+  try {
+    await sequelize.authenticate();
+    console.log("✅ PostgreSQL connection established successfully.");
+  } catch (error) {
+    console.error("❌ Unable to connect to PostgreSQL:", error);
+  }
 };
