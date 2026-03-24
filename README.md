@@ -93,6 +93,7 @@ npx expo start
 
 
 ``` 
+https://restu-back.onrender.com/admin
 
 http://localhost:8000/admin
 
